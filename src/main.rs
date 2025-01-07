@@ -6,9 +6,11 @@ use image;
 mod gram;
 use gram::*;
 
+mod gaodaotext;
+use gaodaotext::*;
+
 // Embed the image data directly into the binary
 const ICON_DATA: &[u8] = include_bytes!("../assets/images/book-cover.jpg");
-
 #[derive(Default, Debug)]
 struct Keys {
     up: Trigram,
@@ -123,5 +125,11 @@ fn main() -> Result<()> {
     println!("Name: {}", name);
     println!("Order: {}", order);
 
+    let ho = get_oracle(order)?;
+    println!("Sum: {}", ho.summary);
+    println!("Guaci: {}", ho.guaci);
+    println!("Explain: {}", ho.guaci_explain.join("\n  "));
+
     Ok(())
 }
+

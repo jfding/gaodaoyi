@@ -105,7 +105,7 @@ impl Display for Hexagram {
     }
 }
 
-pub fn get_hexagram(up: Trigram, down: Trigram) -> (Hexagram, String, isize) {
+pub fn get_hexagram(up: Trigram, down: Trigram) -> (Hexagram, String, usize) {
     let (hexagram, name) = match (up.clone(), down.clone()) {
         (Trigram::Qian, Trigram::Qian) => (Hexagram::Qian, "乾 Heaven"),
         (Trigram::Qian, Trigram::Dui) => (Hexagram::Lu, "履 Treading"),
@@ -185,7 +185,7 @@ pub fn get_hexagram(up: Trigram, down: Trigram) -> (Hexagram, String, isize) {
         }
     };
 
-    return (hexagram.clone(), name.to_string(), hexagram as isize - Hexagram::Qian as isize + 1);
+    return (hexagram.clone(), name.to_string(), hexagram as usize - Hexagram::Qian as usize + 1);
 }
 
 pub fn get_trigram(number: u8) -> Trigram {
