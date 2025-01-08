@@ -13,16 +13,16 @@ const TRIGRAM_NAMES: [(&str, &str, &str); 8] = [
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TrigramName {
-    Qian = '☰' as isize,  // 乾 Heaven ䷀
-    Dui = '☱' as isize,   // 兌 Lake ䷹
-    Li = '☲' as isize,    // 離 Fire ䷝
-    Zhen = '☳' as isize,  // 震 Thunder ䷲
-    Xun = '☴' as isize,   // 巽 Wind ䷸
-    Kan = '☵' as isize,   // 坎 Water ䷜
-    Gen = '☶' as isize,   // 艮 Mountain ䷳
-    Kun = '☷' as isize,   // 坤 Earth ䷁
+    Qian = '☰' as isize,  // 乾 Heaven
+    Dui = '☱' as isize,   // 兌 Lake
+    Li = '☲' as isize,    // 離 Fire
+    Zhen = '☳' as isize,  // 震 Thunder
+    Xun = '☴' as isize,   // 巽 Wind
+    Kan = '☵' as isize,   // 坎 Water
+    Gen = '☶' as isize,   // 艮 Mountain
+    Kun = '☷' as isize,   // 坤 Earth
 }
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Trigram {
     pub name: TrigramName,
     pub unicode: char,
@@ -61,6 +61,22 @@ impl Trigram {
             _ => panic!("Invalid trigram number")
         };
         Trigram::from_name(name)
+    }
+
+    // get the trigram after flipping the specified yao
+    pub fn get_change(&self, yao: u8) -> Self {
+        if yao > 3 {
+            panic!("Invalid yao number");
+        }
+        let yao_index :usize = yao as usize - 1;
+
+        let mut yao_binary = format!("{:03b}", self.order-1);
+        let mut yao_binary_vec = yao_binary.chars().collect::<Vec<char>>();
+        yao_binary_vec[yao_index] = if yao_binary_vec[yao_index] == '0' { '1' } else { '0' };
+        let yao_binary = yao_binary_vec.iter().collect::<String>();
+        let yao_number = u8::from_str_radix(&yao_binary, 2).unwrap() + 1;
+
+        Trigram::from_order(yao_number)
     }
 }
 
@@ -419,8 +435,13 @@ impl Hexagram {
     }   
 
     // get the hexagram after flipping the specified yao
-    pub fn get_change(self, yao: u8) -> Self {
-        // TODO: implement this
-        self
+    pub fn get_change(&self, yao: u8) -> Self {
+        if yao <= 3 {
+            Hexagram::from_up_down(self.up.clone(), self.down.get_change(yao))
+        } else if yao <= 6 {
+            Hexagram::from_up_down(self.up.get_change(yao-3), self.down.clone())
+        } else {
+            panic!("Invalid yao number");
+        }
     }
 }

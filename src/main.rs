@@ -132,6 +132,7 @@ fn main() -> Result<()> {
     println!("Hexagram: {}", hexagram.unicode);
     println!("Name: {}", hexagram.cn_name);
     println!("Order: {}", hexagram.order);
+    println!("Change by {} yao: {}", keys.yao, hexagram.get_change(keys.yao).cn_name);
 
     let ho = get_oracle(hexagram.order)?;
     println!("Sum: {}", ho.summary);
