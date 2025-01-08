@@ -103,7 +103,7 @@ pub struct HexagramOracle {
     pub yaos: Vec<Yao>,
 }
 
-pub fn get_oracle(order: usize) -> Result<HexagramOracle> {
-    let hexagram_oracle: HexagramOracle = serde_json::from_slice(HEXAGRAM_DATA[order - 1])?;
+pub fn get_oracle(order: u8) -> Result<HexagramOracle> {
+    let hexagram_oracle: HexagramOracle = serde_json::from_slice(HEXAGRAM_DATA[order as usize - 1])?;
     Ok(hexagram_oracle)
 }

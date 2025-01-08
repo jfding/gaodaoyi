@@ -62,13 +62,13 @@ fn welcome_pic() -> Result<()> {
 
 fn select_gua(prompt: &str) -> u8 {
     inquire::Select::new(prompt, vec!["1 ☰ Qian/Heaven (乾/天)",
-                                               "2 ☱ Dui/Lake (兌/澤)",
-                                               "3 ☲ Li/Fire (離/火)",
-                                               "4 ☳ Zhen/Thunder (震/雷)",
-                                               "5 ☴ Xun/Wind (巽/風)",
-                                               "6 ☵ Kan/Water (坎/水)",
-                                               "7 ☶ Gen/Mountain (艮/山)",
-                                               "8 ☷ Kun/Earth (坤/地)"])
+                                      "2 ☱ Dui/Lake (兌/澤)",
+                                      "3 ☲ Li/Fire (離/火)",
+                                      "4 ☳ Zhen/Thunder (震/雷)",
+                                      "5 ☴ Xun/Wind (巽/風)",
+                                      "6 ☵ Kan/Water (坎/水)",
+                                      "7 ☶ Gen/Mountain (艮/山)",
+                                      "8 ☷ Kun/Earth (坤/地)"])
         .with_vim_mode(true)
         .with_page_size(8)
         .with_help_message("h/j/k/l | ←↑↓→ | <enter> | ctrl+c")
@@ -113,7 +113,9 @@ fn main() -> Result<()> {
             return Ok(());
         }
 
-        keys = Keys { up: get_trigram(numbers[0]), down: get_trigram(numbers[1]), yao: numbers[2] };
+        keys = Keys { up: Trigram::from_order(numbers[0]),
+                      down: Trigram::from_order(numbers[1]),
+                      yao: numbers[2] };
     } else {
         let args = Args::parse();
 
@@ -121,15 +123,17 @@ fn main() -> Result<()> {
         let down = args.down.unwrap_or_else(|| select_gua("Select down GUA"));
         let yao = args.yao.unwrap_or_else(|| select_yao());
 
-        keys = Keys { up: get_trigram(up), down: get_trigram(down), yao };
+        keys = Keys { up: Trigram::from_order(up),
+                      down: Trigram::from_order(down),
+                      yao };
     }
 
-    let (hexagram, name, order) = get_hexagram(keys.up, keys.down);
-    println!("Hexagram: {}", hexagram.to_string());
-    println!("Name: {}", name);
-    println!("Order: {}", order);
+    let hexagram = Hexagram::from_up_down(keys.up, keys.down);
+    println!("Hexagram: {}", hexagram.unicode);
+    println!("Name: {}", hexagram.cn_name);
+    println!("Order: {}", hexagram.order);
 
-    let ho = get_oracle(order)?;
+    let ho = get_oracle(hexagram.order)?;
     println!("Sum: {}", ho.summary);
     println!("Guaci: {}", ho.guaci);
     println!("Explain: {}", ho.guaci_explain.join("\n  "));

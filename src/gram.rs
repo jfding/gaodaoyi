@@ -1,7 +1,18 @@
 use std::fmt::Display;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Trigram {
+const TRIGRAM_NAMES: [(&str, &str, &str); 8] = [
+    ("乾", "Qian", "Heaven"),
+    ("兌", "Dui", "Lake"),
+    ("離", "Li", "Fire"),
+    ("震", "Zhen", "Thunder"),
+    ("巽", "Xun", "Wind"),
+    ("坎", "Kan", "Water"),
+    ("艮", "Gen", "Mountain"),
+    ("坤", "Kun", "Earth"),
+];
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TrigramName {
     Qian = '☰' as isize,  // 乾 Heaven ䷀
     Dui = '☱' as isize,   // 兌 Lake ䷹
     Li = '☲' as isize,    // 離 Fire ䷝
@@ -11,14 +22,50 @@ pub enum Trigram {
     Gen = '☶' as isize,   // 艮 Mountain ䷳
     Kun = '☷' as isize,   // 坤 Earth ䷁
 }
+#[derive(Debug)]
+pub struct Trigram {
+    pub name: TrigramName,
+    pub unicode: char,
+    pub order: u8,
+    pub cn_name: String,
+    pub py_name: String,
+    pub meaning: String,
+}
 impl Default for Trigram {
     fn default() -> Self {
-        Trigram::Qian
+        Trigram::from_name(TrigramName::Qian)
+    }
+}
+impl Trigram {
+    pub fn from_name(name: TrigramName) -> Self {
+        let order = name.clone() as u8 - TrigramName::Qian as u8 + 1;
+        Trigram {
+            name: name.clone(),
+            unicode: char::from_u32(name as u32).unwrap(),
+            order: order,
+            cn_name: TRIGRAM_NAMES[order as usize - 1].0.to_string(),
+            py_name: TRIGRAM_NAMES[order as usize - 1].1.to_string(),
+            meaning: TRIGRAM_NAMES[order as usize - 1].2.to_string(),
+        }
+    }
+    pub fn from_order(order: u8) -> Trigram {
+        let name = match order {
+            1 => TrigramName::Qian,
+            2 => TrigramName::Dui,
+            3 => TrigramName::Li,
+            4 => TrigramName::Zhen,
+            5 => TrigramName::Xun,
+            6 => TrigramName::Kan,
+            7 => TrigramName::Gen,
+            8 => TrigramName::Kun,
+            _ => panic!("Invalid trigram number")
+        };
+        Trigram::from_name(name)
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Hexagram {
+#[derive(Debug, Clone, Copy,PartialEq, Eq)]
+pub enum HexagramName {
     // 1-8
     Qian = '䷀' as isize,  // 乾 Heaven
     Kun = '䷁' as isize,   // 坤 Earth
@@ -99,193 +146,281 @@ pub enum Hexagram {
     JiJi = '䷾' as isize,   // 既濟 After Completion/Already Fulfilled
     WeiJi = '䷿' as isize,  // 未濟 Before Completion/Not Yet Fulfilled
 }
-impl Display for Hexagram {
+impl Display for HexagramName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", char::from_u32(self.clone() as u32).unwrap())
     }
 }
 
-pub fn get_hexagram(up: Trigram, down: Trigram) -> (Hexagram, String, usize) {
-    let (hexagram, name) = match (up.clone(), down.clone()) {
-        (Trigram::Qian, Trigram::Qian) => (Hexagram::Qian, "乾 Heaven"),
-        (Trigram::Qian, Trigram::Dui) => (Hexagram::Lu, "履 Treading"),
-        (Trigram::Qian, Trigram::Li) => (Hexagram::TongRen, "同人 Fellowship"),
-        (Trigram::Qian, Trigram::Zhen) => (Hexagram::WuWang, "無妄 Innocence"),
-        (Trigram::Qian, Trigram::Xun) => (Hexagram::Gou, "姤 Coming to Meet"),
-        (Trigram::Qian, Trigram::Kan) => (Hexagram::Song, "訟 Conflict"),
-        (Trigram::Qian, Trigram::Gen) => (Hexagram::Dun, "遯 Retreat"),
-        (Trigram::Qian, Trigram::Kun) => (Hexagram::Pi, "否 Standstill"),
-
-        (Trigram::Kun, Trigram::Qian) => (Hexagram::Tai, "泰 Peace"),
-        (Trigram::Kun, Trigram::Dui) => (Hexagram::Lin, "臨 Approach"),
-        (Trigram::Kun, Trigram::Li) => (Hexagram::MingYi, "明夷 Darkening of the Light"),
-        (Trigram::Kun, Trigram::Zhen) => (Hexagram::Fu, "復 Return"),
-        (Trigram::Kun, Trigram::Xun) => (Hexagram::Sheng, "升 Pushing Upward"),
-        (Trigram::Kun, Trigram::Kan) => (Hexagram::Shi, "師 The Army"),
-        (Trigram::Kun, Trigram::Gen) => (Hexagram::Qian2, "謙 Modesty"),
-        (Trigram::Kun, Trigram::Kun) => (Hexagram::Kun, "坤 Earth"),
-
-        (Trigram::Dui, Trigram::Qian) => (Hexagram::Guai, "夬 Breakthrough"),
-        (Trigram::Dui, Trigram::Dui) => (Hexagram::Dui, "兌 Lake/Joyous"),
-        (Trigram::Dui, Trigram::Li) => (Hexagram::Ge, "革 Revolution"),
-        (Trigram::Dui, Trigram::Zhen) => (Hexagram::Sui, "隨 Following"),
-        (Trigram::Dui, Trigram::Xun) => (Hexagram::DaGuo, "大過 Preponderance of the Great"),
-        (Trigram::Dui, Trigram::Kan) => (Hexagram::Kun2, "困 Oppression"),
-        (Trigram::Dui, Trigram::Gen) => (Hexagram::Xian, "咸 Influence"),
-        (Trigram::Dui, Trigram::Kun) => (Hexagram::Cui, "萃 Gathering Together"),
-        
-        (Trigram::Li, Trigram::Qian) => (Hexagram::DaYou, "大有 Possession in Great Measure"),
-        (Trigram::Li, Trigram::Dui) => (Hexagram::Kui, "睽 Opposition"),
-        (Trigram::Li, Trigram::Li) => (Hexagram::Li, "離 Fire"),
-        (Trigram::Li, Trigram::Zhen) => (Hexagram::ShiHe, "噬嗑 Biting Through"),
-        (Trigram::Li, Trigram::Xun) => (Hexagram::Ding, "鼎 The Cauldron"),
-        (Trigram::Li, Trigram::Kan) => (Hexagram::WeiJi, "未濟 Before Completion/Not Yet Fulfilled"),
-        (Trigram::Li, Trigram::Gen) => (Hexagram::LvGua, "旅 The Wanderer"),
-        (Trigram::Li, Trigram::Kun) => (Hexagram::Jin, "晉 Progress"),
-
-        (Trigram::Zhen, Trigram::Qian) => (Hexagram::DaZhuang, "大壯 The Power of the Great"),
-        (Trigram::Zhen, Trigram::Dui) => (Hexagram::GuiMei, "归妹 The Marrying Maiden"),
-        (Trigram::Zhen, Trigram::Li) => (Hexagram::Feng, "豐 Abundance"),
-        (Trigram::Zhen, Trigram::Zhen) => (Hexagram::Zhen, "震 Thunder"),
-        (Trigram::Zhen, Trigram::Xun) => (Hexagram::Heng, "恆 Duration"),
-        (Trigram::Zhen, Trigram::Kan) => (Hexagram::Jie, "解 Deliverance"),
-        (Trigram::Zhen, Trigram::Gen) => (Hexagram::XiaoGuo, "小過 Small Exceeding/Small Preponderance"),
-        (Trigram::Zhen, Trigram::Kun) => (Hexagram::Yu, "豫 Enthusiasm"),
-
-        (Trigram::Xun, Trigram::Qian) => (Hexagram::XiaoXu, "小畜 The Taming Power of the Small"),
-        (Trigram::Xun, Trigram::Dui) => (Hexagram::ZhongFu, "中孚 Inner Truth/Central Truth"),
-        (Trigram::Xun, Trigram::Li) => (Hexagram::JiaRen, "家人 The Family"),
-        (Trigram::Xun, Trigram::Zhen) => (Hexagram::Yi2, "益 Increase"),
-        (Trigram::Xun, Trigram::Xun) => (Hexagram::Xun, "巽 Wind/Gentle"),
-        (Trigram::Xun, Trigram::Kan) => (Hexagram::Huan, "涣 Dispersion"),
-        (Trigram::Xun, Trigram::Gen) => (Hexagram::Jian2, "渐 Progress"),
-        (Trigram::Xun, Trigram::Kun) => (Hexagram::Guan, "觀 Contemplation"),
-
-        (Trigram::Kan, Trigram::Qian) => (Hexagram::Xu, "需 Waiting"),
-        (Trigram::Kan, Trigram::Dui) => (Hexagram::Jie2, "節 Limitation/Restraint"),
-        (Trigram::Kan, Trigram::Li) => (Hexagram::JiJi, "既濟 After Completion/Already Fulfilled"),
-        (Trigram::Kan, Trigram::Zhen) => (Hexagram::Zhun, "屯 Difficulty at the Beginning"),
-        (Trigram::Kan, Trigram::Xun) => (Hexagram::Jing, "井 The Well"),
-        (Trigram::Kan, Trigram::Kan) => (Hexagram::Kan, "坎 Water"),
-        (Trigram::Kan, Trigram::Gen) => (Hexagram::Jian, "蹇 Obstruction"),
-        (Trigram::Kan, Trigram::Kun) => (Hexagram::Bi, "比 Holding Together"),
-
-        (Trigram::Gen, Trigram::Qian) => (Hexagram::DaXu, "大畜 The Taming Power of the Great"),
-        (Trigram::Gen, Trigram::Dui) => (Hexagram::Sun, "損 Decrease"),
-        (Trigram::Gen, Trigram::Li) => (Hexagram::Bi2, "賁 Grace"),
-        (Trigram::Gen, Trigram::Zhen) => (Hexagram::Yi, "頤 The Corners of the Mouth"),
-        (Trigram::Gen, Trigram::Xun) => (Hexagram::Gu, "蠱 Work on the Decayed"),
-        (Trigram::Gen, Trigram::Kan) => (Hexagram::Meng, "蒙 Youthful Folly"),
-        (Trigram::Gen, Trigram::Gen) => (Hexagram::Gen, "艮 Mountain"),
-        (Trigram::Gen, Trigram::Kun) => (Hexagram::Bo, "剝 Splitting Apart"),
-
-        // Default case for any unmatched combination
-        _ => {
-            panic!("Invalid hexagram combination: {:?} {:?}", up, down);
-        }
-    };
-
-    return (hexagram.clone(), name.to_string(), hexagram as usize - Hexagram::Qian as usize + 1);
-}
-
-pub fn get_trigram(number: u8) -> Trigram {
-    match number {
-        1 => Trigram::Qian,
-        2 => Trigram::Dui,
-        3 => Trigram::Li,
-        4 => Trigram::Zhen,
-        5 => Trigram::Xun,
-        6 => Trigram::Kan,
-        7 => Trigram::Gen,
-        8 => Trigram::Kun,
-        _ => panic!("Invalid trigram number")
-    }
-}
-
-fn list_hexagrams() {
-    for hexagram in [
-    Hexagram::Qian,  // 乾 Heaven
-    Hexagram::Kun,   // 坤 Earth
-    Hexagram::Zhun,   // 屯 Difficulty at the Beginning
-    Hexagram::Meng,   // 蒙 Youthful Folly
-    Hexagram::Xu,     // 需 Waiting
-    Hexagram::Song,   // 訟 Conflict
-    Hexagram::Shi,    // 師 The Army
-    Hexagram::Bi,     // 比 Holding Together
+const HEXAGRAM_NAMES: [(&str, &str); 64] = [
+    ("乾", "Heaven"),
+    ("坤", "Earth"),
+    ("屯", "Difficulty at the Beginning"),
+    ("蒙", "Youthful Folly"),
+    ("需", "Waiting"),
+    ("讼", "Conflict"),
+    ("师", "The Army"),
+    ("比", "Holding Together"),
 
     // 9-16  
-    Hexagram::XiaoXu, // 小畜 The Taming Power of the Small
-    Hexagram::Lu,     // 履 Treading
-    Hexagram::Tai,    // 泰 Peace
-    Hexagram::Pi,     // 否 Standstill
-    Hexagram::TongRen,// 同人 Fellowship
-    Hexagram::DaYou,  // 大有 Possession in Great Measure
-    Hexagram::Qian2,  // 謙 Modesty
-    Hexagram::Yu,     // 豫 Enthusiasm
+    ("小畜", "The Taming Power of the Small"),
+    ("履", "Treading"),
+    ("泰", "Peace"),
+    ("否", "Standstill"),
+    ("同人", "Fellowship"),
+    ("大有", "Possession in Great Measure"),
+    ("謙", "Modesty"),
+    ("豫", "Enthusiasm"),
 
     // 17-24
-    Hexagram::Sui,    // 隨 Following
-    Hexagram::Gu,     // 蠱 Work on the Decayed
-    Hexagram::Lin,    // 臨 Approach
-    Hexagram::Guan,   // 觀 Contemplation
-    Hexagram::ShiHe,  // 噬嗑 Biting Through
-    Hexagram::Bi2,    // 賁 Grace
-    Hexagram::Bo,     // 剝 Splitting Apart
-    Hexagram::Fu,     // 復 Return
+    ("隨", "Following"),
+    ("蠱", "Work on the Decayed"),
+    ("臨", "Approach"),
+    ("觀", "Contemplation"),
+    ("噬嗑", "Biting Through"),
+    ("賁", "Grace"),
+    ("剝", "Splitting Apart"),
+    ("復", "Return"),
 
     // 25-32
-    Hexagram::WuWang, // 無妄 Innocence
-    Hexagram::DaXu,   // 大畜 The Taming Power of the Great
-    Hexagram::Yi,     // 頤 The Corners of the Mouth
-    Hexagram::DaGuo,  // 大過 Preponderance of the Great
-    Hexagram::Kan,   // 坎 Water
-    Hexagram::Li,    // 離 Fire
-    Hexagram::Xian,// 咸 Influence
-    Hexagram::Heng,   // 恆 Duration
+    ("無妄", "Innocence"),
+    ("大畜", "The Taming Power of the Great"),
+    ("頤", "The Corners of the Mouth"),
+    ("大過", "Preponderance of the Great"),
+    ("坎", "Water"),
+    ("離", "Fire"),
+    ("咸", "Influence"),
+    ("恆", "Duration"),
 
     // 33-40
-    Hexagram::Dun,    // 遯 Retreat
-    Hexagram::DaZhuang,// 大壯 The Power of the Great
-    Hexagram::Jin,    // 晉 Progress
-    Hexagram::MingYi, // 明夷 Darkening of the Light
-    Hexagram::JiaRen, // 家人 The Family
-    Hexagram::Kui,    // 睽 Opposition
-    Hexagram::Jian,   // 蹇 Obstruction
-    Hexagram::Jie,    // 解 Deliverance
+    ("遯", "Retreat"),
+    ("大壯", "The Power of the Great"),
+    ("晉", "Progress"),
+    ("明夷", "Darkening of the Light"),
+    ("家人", "The Family"),
+    ("睽", "Opposition"),
+    ("蹇", "Obstruction"),
+    ("解", "Deliverance"),
 
     // 41-48
-    Hexagram::Sun,    // 損 Decrease
-    Hexagram::Yi2,    // 益 Increase
-    Hexagram::Guai,   // 夬 Breakthrough
-    Hexagram::Gou,    // 姤 Coming to Meet
-    Hexagram::Cui,    // 萃 Gathering Together
-    Hexagram::Sheng,  // 升 Pushing Upward
-    Hexagram::Kun2,   // 困 Oppression
-    Hexagram::Jing,   // 井 The Well
+    ("損", "Decrease"),
+    ("益", "Increase"),
+    ("夬", "Breakthrough"),
+    ("姤", "Coming to Meet"),
+    ("萃", "Gathering Together"),
+    ("升", "Pushing Upward"),
+    ("困", "Oppression"),
+    ("井", "The Well"),
 
     // 49-56
-    Hexagram::Ge,     // 革 Revolution
-    Hexagram::Ding,   // 鼎 The Cauldron
-    Hexagram::Zhen,  // 震 Thunder
-    Hexagram::Gen,   // 艮 Mountain
-    Hexagram::Jian2, // 渐 Progress
-    Hexagram::GuiMei,// 归妹 The Marrying Maiden
-    Hexagram::Feng,   // 豐 Abundance
-    Hexagram::LvGua,  // 旅 The Wanderer
+    ("革", "Revolution"),
+    ("鼎", "The Cauldron"),
+    ("震", "Thunder"),
+    ("艮", "Mountain"),
+    ("渐", "Progress"),
+    ("归妹", "The Marrying Maiden"),
+    ("豐", "Abundance"),
+    ("旅", "The Wanderer"),
 
     // 57-64
-    Hexagram::Xun,   // 巽 Wind/Gentle
-    Hexagram::Dui,   // 兌 Lake/Joyous
-    Hexagram::Huan,  // 涣 Dispersion
-    Hexagram::Jie2,   // 節 Limitation/Restraint
-    Hexagram::ZhongFu,// 中孚 Inner Truth/Central Truth
-    Hexagram::XiaoGuo,// 小過 Small Exceeding/Small Preponderance
-    Hexagram::JiJi,   // 既濟 After Completion/Already Fulfilled
-    Hexagram::WeiJi,  // 未濟 Before Completion/Not Yet Fulfilled
+    ("巽", "Wind/Gentle"),
+    ("兌", "Lake/Joyous"),
+    ("涣", "Dispersion"),
+    ("節", "Limitation/Restraint"),
+    ("中孚", "Inner Truth/Central Truth"),
+    ("小過", "Small Exceeding/Small Preponderance"),
+    ("既濟", "After Completion/Already Fulfilled"),
+    ("未濟", "Before Completion/Not Yet Fulfilled"),
+];
 
-    ].iter() {
-        println!("{:?} = {}", hexagram, hexagram.clone() as u32);
-        println!("As number: {}", hexagram.clone() as isize);
-        println!("From number back to char: {}", char::from_u32(hexagram.clone() as u32).unwrap());
+const HEXAGRAM_UPDOWN: [(TrigramName, TrigramName); 64] = [
+    (TrigramName::Qian, TrigramName::Qian),
+    (TrigramName::Kun, TrigramName::Kun),
+    (TrigramName::Kan, TrigramName::Zhen),
+    (TrigramName::Gen, TrigramName::Kan),
+    (TrigramName::Kan, TrigramName::Qian),
+    (TrigramName::Qian, TrigramName::Kan),
+    (TrigramName::Kun, TrigramName::Kan),
+    (TrigramName::Kan, TrigramName::Kun),
+    (TrigramName::Xun, TrigramName::Qian),
+    (TrigramName::Qian, TrigramName::Dui),
+    (TrigramName::Kun, TrigramName::Qian),
+    (TrigramName::Qian, TrigramName::Kun),
+    (TrigramName::Qian, TrigramName::Li),
+    (TrigramName::Li, TrigramName::Qian),
+    (TrigramName::Kun, TrigramName::Gen),
+    (TrigramName::Zhen, TrigramName::Kun),
+    (TrigramName::Dui, TrigramName::Zhen),
+    (TrigramName::Gen, TrigramName::Xun),
+    (TrigramName::Kun, TrigramName::Dui),
+    (TrigramName::Xun, TrigramName::Kun),
+    (TrigramName::Li, TrigramName::Zhen),
+    (TrigramName::Gen, TrigramName::Li),
+    (TrigramName::Gen, TrigramName::Kun),
+    (TrigramName::Kun, TrigramName::Zhen),
+    (TrigramName::Qian, TrigramName::Zhen),
+    (TrigramName::Gen, TrigramName::Qian),
+    (TrigramName::Gen, TrigramName::Zhen),
+    (TrigramName::Dui, TrigramName::Xun),
+    (TrigramName::Kan, TrigramName::Kan),
+    (TrigramName::Li, TrigramName::Li),
+    (TrigramName::Dui, TrigramName::Gen),
+    (TrigramName::Zhen, TrigramName::Xun),
+    (TrigramName::Qian, TrigramName::Gen),
+    (TrigramName::Zhen, TrigramName::Qian),
+    (TrigramName::Li, TrigramName::Kun),
+    (TrigramName::Kun, TrigramName::Li),
+    (TrigramName::Xun, TrigramName::Li),
+    (TrigramName::Li, TrigramName::Dui),
+    (TrigramName::Kan, TrigramName::Gen),
+    (TrigramName::Zhen, TrigramName::Kan),
+    (TrigramName::Gen, TrigramName::Dui),
+    (TrigramName::Xun, TrigramName::Zhen),
+    (TrigramName::Dui, TrigramName::Qian),
+    (TrigramName::Qian, TrigramName::Xun),
+    (TrigramName::Dui, TrigramName::Kun),
+    (TrigramName::Kun, TrigramName::Xun),
+    (TrigramName::Dui, TrigramName::Kan),
+    (TrigramName::Kan, TrigramName::Xun),
+    (TrigramName::Dui, TrigramName::Li),
+    (TrigramName::Li, TrigramName::Xun),
+    (TrigramName::Zhen, TrigramName::Zhen),
+    (TrigramName::Gen, TrigramName::Gen),
+    (TrigramName::Xun, TrigramName::Gen),
+    (TrigramName::Zhen, TrigramName::Dui),
+    (TrigramName::Zhen, TrigramName::Li),
+    (TrigramName::Li, TrigramName::Gen),
+    (TrigramName::Xun, TrigramName::Xun),
+    (TrigramName::Dui, TrigramName::Dui),
+    (TrigramName::Xun, TrigramName::Kan),
+    (TrigramName::Kan, TrigramName::Dui),
+    (TrigramName::Xun, TrigramName::Dui),
+    (TrigramName::Zhen, TrigramName::Gen),
+    (TrigramName::Kan, TrigramName::Li),
+    (TrigramName::Li, TrigramName::Kan),
+];
+
+/* used to be used to generate hexagrams from up and down trigrams
+pub fn list_hexagrams() {
+    for order in 1..=64 {
+        let hexagram = Hexagram::from_order(order);
+        for up in 1..=8 {
+            for down in 1..=8 {
+                let up_trigram = Trigram::from_order(up);
+                let down_trigram = Trigram::from_order(down);
+                let (f_hexagram, name, order) = get_hexagram(up_trigram.name, down_trigram.name);
+                if f_hexagram == hexagram.name {
+                    println!("(Trigram::{}, Trigram::{}),", up_trigram.py_name, down_trigram.py_name);
+                    break;
+                }
+            }
+        }
+    }
+}
+*/
+
+#[derive(Debug)]
+pub struct Hexagram {
+    pub name: HexagramName,
+    pub unicode: char,
+    pub order: u8,
+    pub cn_name: String,
+    pub meaning: String,
+    pub up: Trigram,
+    pub down: Trigram,
+}
+impl Hexagram {
+    pub fn from_name(name: HexagramName) -> Self {
+        let order = name.clone() as u8 - HexagramName::Qian as u8 + 1;
+        Hexagram {
+            name: name.clone(),
+            unicode: char::from_u32(name as u32).unwrap(),
+            order: order,
+            cn_name: HEXAGRAM_NAMES[order as usize - 1].0.to_string(),
+            meaning: HEXAGRAM_NAMES[order as usize - 1].1.to_string(),
+            up: Trigram::from_name(HEXAGRAM_UPDOWN[order as usize - 1].0),
+            down: Trigram::from_name(HEXAGRAM_UPDOWN[order as usize - 1].1),
+        }
+    }
+    pub fn from_order(order: u8) -> Self {
+        let name = match order {
+            1 => HexagramName::Qian,
+            2 => HexagramName::Kun,
+            3 => HexagramName::Zhun,
+            4 => HexagramName::Meng,
+            5 => HexagramName::Xu,
+            6 => HexagramName::Song,
+            7 => HexagramName::Shi,
+            8 => HexagramName::Bi,
+            9 => HexagramName::XiaoXu,
+            10 => HexagramName::Lu,
+            11 => HexagramName::Tai,
+            12 => HexagramName::Pi,
+            13 => HexagramName::TongRen,
+            14 => HexagramName::DaYou,
+            15 => HexagramName::Qian2,
+            16 => HexagramName::Yu, 
+            17 => HexagramName::Sui,
+            18 => HexagramName::Gu,
+            19 => HexagramName::Lin,
+            20 => HexagramName::Guan,   
+            21 => HexagramName::ShiHe,
+            22 => HexagramName::Bi2,
+            23 => HexagramName::Bo,
+            24 => HexagramName::Fu, 
+            25 => HexagramName::WuWang,
+            26 => HexagramName::DaXu,
+            27 => HexagramName::Yi,
+            28 => HexagramName::DaGuo,
+            29 => HexagramName::Kan,
+            30 => HexagramName::Li, 
+            31 => HexagramName::Xian,
+            32 => HexagramName::Heng,
+            33 => HexagramName::Dun,
+            34 => HexagramName::DaZhuang,
+            35 => HexagramName::Jin,    
+            36 => HexagramName::MingYi,
+            37 => HexagramName::JiaRen,
+            38 => HexagramName::Kui,
+            39 => HexagramName::Jian,
+            40 => HexagramName::Jie,    
+            41 => HexagramName::Sun,
+            42 => HexagramName::Yi2,
+            43 => HexagramName::Guai,
+            44 => HexagramName::Gou,
+            45 => HexagramName::Cui,
+            46 => HexagramName::Sheng,
+            47 => HexagramName::Kun2,
+            48 => HexagramName::Jing,   
+            49 => HexagramName::Ge,
+            50 => HexagramName::Ding,
+            51 => HexagramName::Zhen,
+            52 => HexagramName::Gen,
+            53 => HexagramName::Jian2,
+            54 => HexagramName::GuiMei,
+            55 => HexagramName::Feng,
+            56 => HexagramName::LvGua,
+            57 => HexagramName::Xun,
+            58 => HexagramName::Dui,
+            59 => HexagramName::Huan,
+            60 => HexagramName::Jie2,
+            61 => HexagramName::ZhongFu,
+            62 => HexagramName::XiaoGuo,
+            63 => HexagramName::JiJi,
+            64 => HexagramName::WeiJi,  
+            _ => panic!("Invalid hexagram number")
+        };
+        Hexagram::from_name(name)
+    }
+
+    pub fn from_up_down(up: Trigram, down: Trigram) -> Self {
+        let order = HEXAGRAM_UPDOWN.iter().position(|(u, d)| *u == up.name && *d == down.name).unwrap();
+        Hexagram::from_order(order as u8 + 1)
+    }   
+
+    // get the hexagram after flipping the specified yao
+    pub fn get_change(self, yao: u8) -> Self {
+        // TODO: implement this
+        self
     }
 }
