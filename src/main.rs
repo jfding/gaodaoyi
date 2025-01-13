@@ -2,6 +2,8 @@ use clap::Parser;
 use viuer::Config;
 use anyhow::Result;
 use image;
+use termimad::*;
+use tera::{Tera, Context};
 
 mod gram;
 use gram::*;
@@ -129,15 +131,33 @@ fn main() -> Result<()> {
     }
 
     let hexagram = Hexagram::from_up_down(keys.up, keys.down);
-    println!("Hexagram: {}", hexagram.unicode);
-    println!("Name: {}", hexagram.cn_name);
-    println!("Order: {}", hexagram.order);
-    println!("Change by {} yao: {}", keys.yao, hexagram.get_change(keys.yao).cn_name);
+    let ho = get_gua_oracle(hexagram.order)?;
+    
+    // Create a markdown string with your content
+    let mut tmpl = Tera::default();
+    tmpl.add_raw_template("OracleGua", ORACLE_TEMPLATE)?;
+    let mut ctx = Context::new();
+    ctx.insert("unicode", &hexagram.unicode.to_string());
+    ctx.insert("long_name", &hexagram.long_name);
+    ctx.insert("order", &hexagram.order.to_string());
+    ctx.insert("summary", &ho.summary);
+    ctx.insert("guaci", &ho.guaci);
+    ctx.insert("guaci_explain", &ho.guaci_explain);
+    ctx.insert("tuan", &ho.tuan);
+    ctx.insert("tuan_explain", &ho.tuan_explain);
+    ctx.insert("daxiang", &ho.daxiang);
+    ctx.insert("daxiang_explain", &ho.daxiang_explain); 
+    ctx.insert("guazhan", &ho.guazhan);
 
-    let ho = get_oracle(hexagram.order)?;
-    println!("Sum: {}", ho.summary);
-    println!("Guaci: {}", ho.guaci);
-    println!("Explain: {}", ho.guaci_explain.join("\n  "));
+    let md_text = tmpl.render("OracleGua", &ctx)?;
+    
+    // Print the formatted markdown
+    let mut skin = MadSkin::default();
+    skin.set_headers_fg(rgb(255, 187, 0));
+    skin.bold.set_fg(rgb(255, 187, 0));
+    skin.italic.set_fg(rgb(215, 255, 135));
+    skin.bullet = StyledChar::from_fg_char(rgb(255, 187, 0), '•');
+    skin.print_text(&md_text);
 
     Ok(())
 }

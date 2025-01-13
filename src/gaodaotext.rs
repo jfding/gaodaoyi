@@ -69,20 +69,22 @@ const HEXAGRAM_DATA: [&[u8]; 64] = [
     include_bytes!("../assets/json/gd64.json"),
 ];
 
-#[derive(Default, Deserialize)]
+pub const ORACLE_TEMPLATE: &str = include_str!("../assets/templates/oracle_gua.md");
+
+#[derive(Default, Clone, Deserialize)]
 struct Case {
     Q: String,
     A: Vec<String>,
 }
 
-#[derive(Default, Deserialize)]
-struct Yao {
-    yaoci: String,
-    xiaoxiang: String,
+#[derive(Default, Clone, Deserialize)]
+pub struct Yao {
+    pub yaoci: String,
+    pub xiaoxiang: String,
     #[serde(rename = "yaoci-explain")]
-    yaoci_explain: Vec<String>,
-    yaozhan: Vec<String>,
-    cases: Vec<Case>,
+    pub yaoci_explain: Vec<String>,
+    pub yaozhan: Vec<String>,
+    pub cases: Vec<Case>,
 }
 
 #[derive(Default, Deserialize)]
@@ -103,7 +105,17 @@ pub struct HexagramOracle {
     pub yaos: Vec<Yao>,
 }
 
-pub fn get_oracle(order: u8) -> Result<HexagramOracle> {
+pub fn get_gua_oracle_raw(order: u8) -> Result<&'static [u8]> {
+    Ok(HEXAGRAM_DATA[order as usize - 1])
+}
+
+pub fn get_gua_oracle(order: u8) -> Result<HexagramOracle> {
     let hexagram_oracle: HexagramOracle = serde_json::from_slice(HEXAGRAM_DATA[order as usize - 1])?;
     Ok(hexagram_oracle)
+}
+
+pub fn get_yao_oracle(order: u8, yao: u8) -> Result<Yao> {
+    let hexagram_oracle: HexagramOracle = serde_json::from_slice(HEXAGRAM_DATA[order as usize - 1])?;
+    let yao_oracle: Yao = hexagram_oracle.yaos[yao as usize - 1].clone();
+    Ok(yao_oracle)
 }
