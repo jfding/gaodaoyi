@@ -4,6 +4,7 @@ use anyhow::Result;
 use image;
 use termimad::*;
 use tera::{Tera, Context};
+use clearscreen;
 
 mod gram;
 use gram::*;
@@ -55,6 +56,9 @@ fn welcome_pic() -> Result<()> {
         ..Default::default()
     };
 
+    // clean up the terminal
+    clearscreen::clear()?;
+
     // Display the image
     viuer::print(&img, &conf)?;
 
@@ -63,18 +67,18 @@ fn welcome_pic() -> Result<()> {
 
 
 fn select_gua(prompt: &str) -> u8 {
-    inquire::Select::new(prompt, vec!["1 ☰ Qian/Heaven (乾/天)",
-                                      "2 ☱ Dui/Lake (兌/澤)",
-                                      "3 ☲ Li/Fire (離/火)",
-                                      "4 ☳ Zhen/Thunder (震/雷)",
-                                      "5 ☴ Xun/Wind (巽/風)",
-                                      "6 ☵ Kan/Water (坎/水)",
-                                      "7 ☶ Gen/Mountain (艮/山)",
-                                      "8 ☷ Kun/Earth (坤/地)"])
+    inquire::Select::new(prompt, vec!["1 ☰ 乾/天 (Qian/Heaven)",
+                                      "2 ☱ 兌/澤 (Dui/Lake)",
+                                      "3 ☲ 離/火 (Li/Fire)",
+                                      "4 ☳ 震/雷 (Zhen/Thunder)",
+                                      "5 ☴ 巽/風 (Xun/Wind)",
+                                      "6 ☵ 坎/水 (Kan/Water)",
+                                      "7 ☶ 艮/山 (Gen/Mountain)",
+                                      "8 ☷ 坤/地 (Kun/Earth)"])
         .with_vim_mode(true)
         .with_page_size(8)
         .with_help_message("h/j/k/l | ←↑↓→ | <enter> | ctrl+c")
-        .with_render_config(inquire::ui::RenderConfig::default().with_highlighted_option_prefix("☯️".into()))
+        .with_render_config(inquire::ui::RenderConfig::default().with_highlighted_option_prefix("󰚀️".into()))
         .prompt()
         .unwrap_or_else(|_e| { std::process::exit(1); })
         .split(" ")
@@ -84,8 +88,8 @@ fn select_gua(prompt: &str) -> u8 {
         .expect("Failed to parse input")
 }
 
-fn select_yao() -> u8 {
-    inquire::Select::new("Select YAO number", vec!["1 初", "2 二", "3 三", "4 四", "5 五", "6 上"])
+fn select_yao(prompt: &str) -> u8 {
+    inquire::Select::new(prompt, vec!["1 初爻", "2 二爻", "3 三爻", "4 四爻", "5 五爻", "6 上爻"])
         .with_vim_mode(true)
         .with_page_size(6)
         .with_help_message("h/j/k/l | ←↑↓→ | <enter> | ctrl+c")
@@ -100,7 +104,7 @@ fn select_yao() -> u8 {
 }
 
 fn main() -> Result<()> {
-    //welcome_pic();
+    welcome_pic();
 
     let mut keys = Keys::default();
 
@@ -121,9 +125,9 @@ fn main() -> Result<()> {
     } else {
         let args = Args::parse();
 
-        let up = args.up.unwrap_or_else(|| select_gua("Select up GUA"));
-        let down = args.down.unwrap_or_else(|| select_gua("Select down GUA"));
-        let yao = args.yao.unwrap_or_else(|| select_yao());
+        let up = args.up.unwrap_or_else(|| select_gua("請選擇上卦"));
+        let down = args.down.unwrap_or_else(|| select_gua("請選擇下卦"));
+        let yao = args.yao.unwrap_or_else(|| select_yao("請選擇變爻"));
 
         keys = Keys { up: Trigram::from_order(up),
                       down: Trigram::from_order(down),
@@ -170,10 +174,8 @@ fn main() -> Result<()> {
     skin.italic.set_fg(rgb(215, 255, 135));
     skin.bullet = StyledChar::from_fg_char(rgb(255, 187, 0), '•');
 
-
     skin.print_text(&md_gua);
     skin.print_text(&md_yao);
 
     Ok(())
 }
-
