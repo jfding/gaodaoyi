@@ -2,6 +2,8 @@ use serde::Deserialize;
 use serde::Serialize;
 use serde_json;
 use anyhow::Result;
+use tera::{Tera, Context};
+use crate::gram::Hexagram;
 
 const HEXAGRAM_DATA: [&[u8]; 64] = [
     include_bytes!("../assets/json/gd01.json"),
@@ -107,13 +109,49 @@ pub struct HexagramOracle {
     pub yaos: Vec<Yao>,
 }
 
-pub fn get_gua_oracle_raw(order: u8) -> Result<&'static [u8]> {
-    Ok(HEXAGRAM_DATA[order as usize - 1])
-}
-
 pub fn get_gua_oracle(order: u8) -> Result<HexagramOracle> {
     let hexagram_oracle: HexagramOracle = serde_json::from_slice(HEXAGRAM_DATA[order as usize - 1])?;
     Ok(hexagram_oracle)
+}
+
+pub fn get_gua_oracle_md(order: u8) -> Result<String> {
+    let hexagram = Hexagram::from_order(order);
+    let ho = get_gua_oracle(order)?;
+
+    let mut tmpl = Tera::default();
+    tmpl.add_raw_template("OracleGua", ORACLE_GUA_TEMPLATE)?;
+
+    let mut ctx = Context::new();
+    ctx.insert("unicode", &hexagram.unicode.to_string());
+    ctx.insert("long_name", &hexagram.long_name);
+    ctx.insert("order", &hexagram.order.to_string());
+    ctx.insert("summary", &ho.summary);
+    ctx.insert("guaci", &ho.guaci);
+    ctx.insert("guaci_explain", &ho.guaci_explain);
+    ctx.insert("tuan", &ho.tuan);
+    ctx.insert("tuan_explain", &ho.tuan_explain);
+    ctx.insert("daxiang", &ho.daxiang);
+    ctx.insert("daxiang_explain", &ho.daxiang_explain);
+    ctx.insert("guazhan", &ho.guazhan);
+
+    Ok(tmpl.render("OracleGua", &ctx)?)
+}
+
+pub fn get_yao_oracle_md(order: u8, yao: u8) -> Result<String> {
+    let ho = get_gua_oracle(order)?;
+    let yao = &ho.yaos[yao as usize - 1];
+
+    let mut tmpl = Tera::default();
+    tmpl.add_raw_template("OracleYao", ORACLE_YAO_TEMPLATE)?;
+
+    let mut ctx = Context::new();
+    ctx.insert("yaoci", &yao.yaoci);
+    ctx.insert("xiaoxiang", &yao.xiaoxiang);
+    ctx.insert("yaoci_explain", &yao.yaoci_explain);
+    ctx.insert("yaozhan", &yao.yaozhan);
+    ctx.insert("cases", &yao.cases);
+
+    Ok(tmpl.render("OracleYao", &ctx)?)
 }
 
 pub fn get_yao_oracle(order: u8, yao: u8) -> Result<Yao> {

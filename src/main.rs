@@ -3,7 +3,6 @@ use viuer::Config;
 use anyhow::Result;
 use image;
 use termimad::*;
-use tera::{Tera, Context};
 use clearscreen;
 
 mod gram;
@@ -113,10 +112,10 @@ fn select_yao(prompt: &str) -> u8 {
 
 fn main() -> Result<()> {
     let mut keys = Keys::default();
+    let mut show_changed = false;
 
     // peek the cli args before parsing them
     let ori_args :Vec<_> = std::env::args().collect();
-
     if ori_args.len() == 4 && ori_args.iter().skip(1).all(|arg| arg.parse::<u8>().is_ok()) {
         // All arguments are valid numbers
         let numbers :Vec<_> = ori_args.iter().skip(1).map(|arg| arg.parse::<u8>().unwrap()).collect();
@@ -134,6 +133,9 @@ fn main() -> Result<()> {
         if !args.silent {
             welcome_pic();
         }
+        if args.changed {
+            show_changed = true;
+        }
 
         let up = args.up.unwrap_or_else(|| select_gua("請選擇上卦"));
         let down = args.down.unwrap_or_else(|| select_gua("請選擇下卦"));
@@ -145,37 +147,8 @@ fn main() -> Result<()> {
     }
 
     let hexagram = Hexagram::from_up_down(keys.up, keys.down);
-    let ho = get_gua_oracle(hexagram.order)?;
-    
-    // Create a markdown string with your content
-    let mut tmpl = Tera::default();
-    tmpl.add_raw_template("OracleGua", ORACLE_GUA_TEMPLATE)?;
-    tmpl.add_raw_template("OracleYao", ORACLE_YAO_TEMPLATE)?;
-
-    let mut ctx = Context::new();
-    ctx.insert("unicode", &hexagram.unicode.to_string());
-    ctx.insert("long_name", &hexagram.long_name);
-    ctx.insert("order", &hexagram.order.to_string());
-    ctx.insert("summary", &ho.summary);
-    ctx.insert("guaci", &ho.guaci);
-    ctx.insert("guaci_explain", &ho.guaci_explain);
-    ctx.insert("tuan", &ho.tuan);
-    ctx.insert("tuan_explain", &ho.tuan_explain);
-    ctx.insert("daxiang", &ho.daxiang);
-    ctx.insert("daxiang_explain", &ho.daxiang_explain); 
-    ctx.insert("guazhan", &ho.guazhan);
-
-    let md_gua = tmpl.render("OracleGua", &ctx)?;
-
-
-    let yao = &ho.yaos[keys.yao as usize - 1];
-    ctx.insert("yaoci", &yao.yaoci);
-    ctx.insert("xiaoxiang", &yao.xiaoxiang);
-    ctx.insert("yaoci_explain", &yao.yaoci_explain);
-    ctx.insert("yaozhan", &yao.yaozhan);
-    ctx.insert("cases", &yao.cases);
-
-    let md_yao = tmpl.render("OracleYao", &ctx)?;
+    let md_gua = get_gua_oracle_md(hexagram.order)?;
+    let md_yao = get_yao_oracle_md(hexagram.order, keys.yao)?;
     
     // Print the formatted markdown
     let mut skin = MadSkin::default();
@@ -186,6 +159,12 @@ fn main() -> Result<()> {
 
     skin.print_text(&md_gua);
     skin.print_text(&md_yao);
+
+    if show_changed {
+        let changed_hexagram = hexagram.get_change(keys.yao);
+        let md_changed_gua = get_gua_oracle_md(changed_hexagram.order)?;
+        skin.print_text(&format!("---\n# 變卦\n#{}", md_changed_gua));
+    }
 
     Ok(())
 }
