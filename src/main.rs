@@ -36,6 +36,14 @@ struct Args {
     /// Number of critical "yao" number: 1-6
     #[arg(short, long, value_parser = clap::value_parser!(u8).range(1..=6))]
     yao: Option<u8>,
+
+    /// Whether to show Changed Hexagram
+    #[arg(short, long)]
+    changed: bool,
+
+    /// Whether to show welcome picture
+    #[arg(short, long)]
+    silent: bool,
 }
 
 fn welcome_pic() -> Result<()> {
@@ -104,8 +112,6 @@ fn select_yao(prompt: &str) -> u8 {
 }
 
 fn main() -> Result<()> {
-    welcome_pic();
-
     let mut keys = Keys::default();
 
     // peek the cli args before parsing them
@@ -124,6 +130,10 @@ fn main() -> Result<()> {
                       yao: numbers[2] };
     } else {
         let args = Args::parse();
+
+        if !args.silent {
+            welcome_pic();
+        }
 
         let up = args.up.unwrap_or_else(|| select_gua("請選擇上卦"));
         let down = args.down.unwrap_or_else(|| select_gua("請選擇下卦"));
