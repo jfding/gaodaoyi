@@ -135,7 +135,9 @@ fn main() -> Result<()> {
     
     // Create a markdown string with your content
     let mut tmpl = Tera::default();
-    tmpl.add_raw_template("OracleGua", ORACLE_TEMPLATE)?;
+    tmpl.add_raw_template("OracleGua", ORACLE_GUA_TEMPLATE)?;
+    tmpl.add_raw_template("OracleYao", ORACLE_YAO_TEMPLATE)?;
+
     let mut ctx = Context::new();
     ctx.insert("unicode", &hexagram.unicode.to_string());
     ctx.insert("long_name", &hexagram.long_name);
@@ -149,7 +151,17 @@ fn main() -> Result<()> {
     ctx.insert("daxiang_explain", &ho.daxiang_explain); 
     ctx.insert("guazhan", &ho.guazhan);
 
-    let md_text = tmpl.render("OracleGua", &ctx)?;
+    let md_gua = tmpl.render("OracleGua", &ctx)?;
+
+
+    let yao = &ho.yaos[keys.yao as usize - 1];
+    ctx.insert("yaoci", &yao.yaoci);
+    ctx.insert("xiaoxiang", &yao.xiaoxiang);
+    ctx.insert("yaoci_explain", &yao.yaoci_explain);
+    ctx.insert("yaozhan", &yao.yaozhan);
+    ctx.insert("cases", &yao.cases);
+
+    let md_yao = tmpl.render("OracleYao", &ctx)?;
     
     // Print the formatted markdown
     let mut skin = MadSkin::default();
@@ -157,7 +169,10 @@ fn main() -> Result<()> {
     skin.bold.set_fg(rgb(255, 187, 0));
     skin.italic.set_fg(rgb(215, 255, 135));
     skin.bullet = StyledChar::from_fg_char(rgb(255, 187, 0), '•');
-    skin.print_text(&md_text);
+
+
+    skin.print_text(&md_gua);
+    skin.print_text(&md_yao);
 
     Ok(())
 }

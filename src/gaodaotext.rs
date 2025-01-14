@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use serde::Serialize;
 use serde_json;
 use anyhow::Result;
 
@@ -69,12 +70,13 @@ const HEXAGRAM_DATA: [&[u8]; 64] = [
     include_bytes!("../assets/json/gd64.json"),
 ];
 
-pub const ORACLE_TEMPLATE: &str = include_str!("../assets/templates/oracle_gua.md");
+pub const ORACLE_GUA_TEMPLATE: &str = include_str!("../assets/templates/oracle_gua.md");
+pub const ORACLE_YAO_TEMPLATE: &str = include_str!("../assets/templates/oracle_yao.md");
 
-#[derive(Default, Clone, Deserialize)]
-struct Case {
-    Q: String,
-    A: Vec<String>,
+#[derive(Default, Clone, Deserialize, Serialize)]
+pub struct Case {
+    pub Q: String,
+    pub A: Vec<String>,
 }
 
 #[derive(Default, Clone, Deserialize)]
