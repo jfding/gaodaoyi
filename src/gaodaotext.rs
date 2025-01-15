@@ -5,6 +5,294 @@ use anyhow::Result;
 use tera::{Tera, Context};
 use crate::gram::Hexagram;
 
+const HEXAGRAM_GLYPHS_NULL: [(&str, &[u8]); 3] = [
+    ("", &[]),
+    ("", &[]),
+    ("", &[]),
+];
+
+const HEXAGRAM_GLYPHS_01: [(&str, &[u8]); 3] = [
+    ("甲骨文元", include_bytes!("../assets/images/gd01_甲骨文元.jpg")),
+    ("甲骨文利", include_bytes!("../assets/images/gd01_甲骨文利.jpg")),
+    ("甲骨文贞", include_bytes!("../assets/images/gd01_甲骨文贞.jpg")),
+];
+const HEXAGRAM_GLYPHS_02: [(&str, &[u8]); 3] = [
+    ("古文“坤”字", include_bytes!("../assets/images/gd02_古文“坤”字.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_03: [(&str, &[u8]); 3] = [
+    ("甲骨文屯", include_bytes!("../assets/images/gd03_甲骨文屯.jpg")),
+    ("篆体屯", include_bytes!("../assets/images/gd03_篆体屯.jpg")),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_04: [(&str, &[u8]); 3] = [
+    ("甲骨文蒙", include_bytes!("../assets/images/gd04_甲骨文蒙.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_05: [(&str, &[u8]); 3] = [
+    ("金文需", include_bytes!("../assets/images/gd05_金文需.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_07: [(&str, &[u8]); 3] = [
+    ("篆书师", include_bytes!("../assets/images/gd07_篆书师.jpg")),
+    ("金文师", include_bytes!("../assets/images/gd07_金文师.jpg")),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_08: [(&str, &[u8]); 3] = [
+    ("甲骨文比", include_bytes!("../assets/images/gd08_甲骨文比.jpg")),
+    ("篆书比", include_bytes!("../assets/images/gd08_篆书比.jpg")),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_09: [(&str, &[u8]); 3] = [
+    ("甲骨文畜", include_bytes!("../assets/images/gd09_甲骨文畜.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_10: [(&str, &[u8]); 3] = [
+    ("篆书履", include_bytes!("../assets/images/gd10_篆书履.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_11: [(&str, &[u8]); 3] = [
+    ("篆书泰", include_bytes!("../assets/images/gd11_篆书泰.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_12: [(&str, &[u8]); 3] = [
+    ("篆书否", include_bytes!("../assets/images/gd12_篆书否.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_15: [(&str, &[u8]); 3] = [
+    ("篆书谦", include_bytes!("../assets/images/gd15_篆书谦.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_16: [(&str, &[u8]); 3] = [
+    ("甲骨文豫", include_bytes!("../assets/images/gd16_甲骨文豫.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_17: [(&str, &[u8]); 3] = [
+    ("篆书随", include_bytes!("../assets/images/gd17_篆书随.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_18: [(&str, &[u8]); 3] = [
+    ("甲骨文蛊", include_bytes!("../assets/images/gd18_甲骨文蛊.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_19: [(&str, &[u8]); 3] = [
+    ("金文临", include_bytes!("../assets/images/gd19_金文临.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_20: [(&str, &[u8]); 3] = [
+    ("甲骨文观", include_bytes!("../assets/images/gd20_甲骨文观.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_21: [(&str, &[u8]); 3] = [
+    ("篆书嗑", include_bytes!("../assets/images/gd21_篆书嗑.jpg")),
+    ("篆书噬", include_bytes!("../assets/images/gd21_篆书噬.jpg")),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_22: [(&str, &[u8]); 3] = [
+    ("篆书贲", include_bytes!("../assets/images/gd22_篆书贲.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_23: [(&str, &[u8]); 3] = [
+    ("篆书剥", include_bytes!("../assets/images/gd23_篆书剥.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_24: [(&str, &[u8]); 3] = [
+    ("甲骨文复", include_bytes!("../assets/images/gd24_甲骨文复.jpg")),
+    ("篆书复", include_bytes!("../assets/images/gd24_篆书复.jpg")),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_27: [(&str, &[u8]); 3] = [
+    ("篆书颐", include_bytes!("../assets/images/gd27_篆书颐.jpg")),
+    ("金文颐", include_bytes!("../assets/images/gd27_金文颐.jpg")),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_29: [(&str, &[u8]); 3] = [
+    ("篆书坎", include_bytes!("../assets/images/gd29_篆书坎.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_30: [(&str, &[u8]); 3] = [
+    ("篆书离", include_bytes!("../assets/images/gd30_篆书离.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_31: [(&str, &[u8]); 3] = [
+    ("甲骨文咸", include_bytes!("../assets/images/gd31_甲骨文咸.jpg")),
+    ("金文咸", include_bytes!("../assets/images/gd31_金文咸.jpg")),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_32: [(&str, &[u8]); 3] = [
+    ("甲骨文恒", include_bytes!("../assets/images/gd32_甲骨文恒.jpg")),
+    ("篆书恒", include_bytes!("../assets/images/gd32_篆书恒.jpg")),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_35: [(&str, &[u8]); 3] = [
+    ("金文晋", include_bytes!("../assets/images/gd35_金文晋.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_38: [(&str, &[u8]); 3] = [
+    ("金文睽", include_bytes!("../assets/images/gd38_金文睽.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_39: [(&str, &[u8]); 3] = [
+    ("篆书蹇", include_bytes!("../assets/images/gd39_篆书蹇.jpg")),
+    ("金文蹇", include_bytes!("../assets/images/gd39_金文蹇.jpg")),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_40: [(&str, &[u8]); 3] = [
+    ("甲骨文解", include_bytes!("../assets/images/gd40_甲骨文解.jpg")),
+    ("篆书解", include_bytes!("../assets/images/gd40_篆书解.jpg")),
+    ("金文解", include_bytes!("../assets/images/gd40_金文解.jpg")),
+];
+const HEXAGRAM_GLYPHS_42: [(&str, &[u8]); 3] = [
+    ("甲骨文益", include_bytes!("../assets/images/gd42_甲骨文益.jpg")),
+    ("篆书益", include_bytes!("../assets/images/gd42_篆书益.jpg")),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_43: [(&str, &[u8]); 3] = [
+    ("篆书夬", include_bytes!("../assets/images/gd43_篆书夬.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_45: [(&str, &[u8]); 3] = [
+    ("篆书萃", include_bytes!("../assets/images/gd45_篆书萃.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_46: [(&str, &[u8]); 3] = [
+    ("篆书升", include_bytes!("../assets/images/gd46_篆书升.jpg")),
+    ("金文升", include_bytes!("../assets/images/gd46_金文升.jpg")),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_47: [(&str, &[u8]); 3] = [
+    ("甲骨文困", include_bytes!("../assets/images/gd47_甲骨文困.jpg")),
+    ("篆书困", include_bytes!("../assets/images/gd47_篆书困.jpg")),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_48: [(&str, &[u8]); 3] = [
+    ("金文井", include_bytes!("../assets/images/gd48_金文井.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_49: [(&str, &[u8]); 3] = [
+    ("金文革", include_bytes!("../assets/images/gd49_金文革.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_50: [(&str, &[u8]); 3] = [
+    ("甲骨文鼎", include_bytes!("../assets/images/gd50_甲骨文鼎.jpg")),
+    ("金文鼎", include_bytes!("../assets/images/gd50_金文鼎.jpg")),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_55: [(&str, &[u8]); 3] = [
+    ("金文丰", include_bytes!("../assets/images/gd55_金文丰.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_56: [(&str, &[u8]); 3] = [
+    ("甲骨文旅", include_bytes!("../assets/images/gd56_甲骨文旅.jpg")),
+    ("篆书旅", include_bytes!("../assets/images/gd56_篆书旅.jpg")),
+    ("金文旅", include_bytes!("../assets/images/gd56_金文旅.jpg")),
+];
+const HEXAGRAM_GLYPHS_57: [(&str, &[u8]); 3] = [
+    ("篆书巽", include_bytes!("../assets/images/gd57_篆书巽.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_58: [(&str, &[u8]); 3] = [
+    ("甲骨文兑", include_bytes!("../assets/images/gd58_甲骨文兑.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const HEXAGRAM_GLYPHS_60: [(&str, &[u8]); 3] = [
+    ("金文节", include_bytes!("../assets/images/gd60_金文节.jpg")),
+    ("", &[]),
+    ("", &[]),
+];
+const ALL_HEXAGRAM_GLYPHS: [[(&str, &[u8]); 3]; 64] = [
+    HEXAGRAM_GLYPHS_01,
+    HEXAGRAM_GLYPHS_02,
+    HEXAGRAM_GLYPHS_03,
+    HEXAGRAM_GLYPHS_04,
+    HEXAGRAM_GLYPHS_05,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_07,
+    HEXAGRAM_GLYPHS_08,
+    HEXAGRAM_GLYPHS_09,
+    HEXAGRAM_GLYPHS_10,
+    HEXAGRAM_GLYPHS_11,
+    HEXAGRAM_GLYPHS_12,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_15,
+    HEXAGRAM_GLYPHS_16,
+    HEXAGRAM_GLYPHS_17,
+    HEXAGRAM_GLYPHS_18,
+    HEXAGRAM_GLYPHS_19,
+    HEXAGRAM_GLYPHS_20,
+    HEXAGRAM_GLYPHS_21,
+    HEXAGRAM_GLYPHS_22,
+    HEXAGRAM_GLYPHS_23,
+    HEXAGRAM_GLYPHS_24,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_27,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_29,
+    HEXAGRAM_GLYPHS_30,
+    HEXAGRAM_GLYPHS_31,
+    HEXAGRAM_GLYPHS_32,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_35,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_38,
+    HEXAGRAM_GLYPHS_39,
+    HEXAGRAM_GLYPHS_40,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_42,
+    HEXAGRAM_GLYPHS_43,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_45,
+    HEXAGRAM_GLYPHS_46,
+    HEXAGRAM_GLYPHS_47,
+    HEXAGRAM_GLYPHS_48,
+    HEXAGRAM_GLYPHS_49,
+    HEXAGRAM_GLYPHS_50,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_55,
+    HEXAGRAM_GLYPHS_56,
+    HEXAGRAM_GLYPHS_57,
+    HEXAGRAM_GLYPHS_58,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_60,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_NULL,
+    HEXAGRAM_GLYPHS_NULL,
+];
+
 const HEXAGRAM_DATA: [&[u8]; 64] = [
     include_bytes!("../assets/json/gd01.json"),
     include_bytes!("../assets/json/gd02.json"),
@@ -109,14 +397,18 @@ pub struct HexagramOracle {
     pub yaos: Vec<Yao>,
 }
 
-pub fn get_gua_oracle(order: u8) -> Result<HexagramOracle> {
+pub fn get_gua_oracle(hexagram: &Hexagram) -> Result<HexagramOracle> {
+    let order = hexagram.order;
     let hexagram_oracle: HexagramOracle = serde_json::from_slice(HEXAGRAM_DATA[order as usize - 1])?;
     Ok(hexagram_oracle)
 }
 
-pub fn get_gua_oracle_md(order: u8) -> Result<String> {
-    let hexagram = Hexagram::from_order(order);
-    let ho = get_gua_oracle(order)?;
+pub fn get_gua_glyphs(hexagram: &Hexagram) -> Vec<(&str, &[u8])> {
+    ALL_HEXAGRAM_GLYPHS[hexagram.order as usize - 1].to_vec()
+}
+
+pub fn get_gua_oracle_md(hexagram: &Hexagram) -> Result<String> {
+    let ho = get_gua_oracle(hexagram)?;
 
     let mut tmpl = Tera::default();
     tmpl.add_raw_template("OracleGua", ORACLE_GUA_TEMPLATE)?;
@@ -137,25 +429,24 @@ pub fn get_gua_oracle_md(order: u8) -> Result<String> {
     Ok(tmpl.render("OracleGua", &ctx)?)
 }
 
-pub fn get_yao_oracle_md(order: u8, yao: u8) -> Result<String> {
-    let ho = get_gua_oracle(order)?;
-    let yao = &ho.yaos[yao as usize - 1];
+pub fn get_yao_oracle(hexagram: &Hexagram, yao: u8) -> Result<Yao> {
+    let ho = get_gua_oracle(hexagram)?;
+    let yao_oracle: Yao = ho.yaos[yao as usize - 1].clone();
+    Ok(yao_oracle)
+}
+
+pub fn get_yao_oracle_md(hexagram: &Hexagram, yao: u8) -> Result<String> {
+    let yao_oracle = get_yao_oracle(hexagram, yao)?;
 
     let mut tmpl = Tera::default();
     tmpl.add_raw_template("OracleYao", ORACLE_YAO_TEMPLATE)?;
 
     let mut ctx = Context::new();
-    ctx.insert("yaoci", &yao.yaoci);
-    ctx.insert("xiaoxiang", &yao.xiaoxiang);
-    ctx.insert("yaoci_explain", &yao.yaoci_explain);
-    ctx.insert("yaozhan", &yao.yaozhan);
-    ctx.insert("cases", &yao.cases);
+    ctx.insert("yaoci", &yao_oracle.yaoci);
+    ctx.insert("xiaoxiang", &yao_oracle.xiaoxiang);
+    ctx.insert("yaoci_explain", &yao_oracle.yaoci_explain);
+    ctx.insert("yaozhan", &yao_oracle.yaozhan);
+    ctx.insert("cases", &yao_oracle.cases);
 
     Ok(tmpl.render("OracleYao", &ctx)?)
-}
-
-pub fn get_yao_oracle(order: u8, yao: u8) -> Result<Yao> {
-    let hexagram_oracle: HexagramOracle = serde_json::from_slice(HEXAGRAM_DATA[order as usize - 1])?;
-    let yao_oracle: Yao = hexagram_oracle.yaos[yao as usize - 1].clone();
-    Ok(yao_oracle)
 }

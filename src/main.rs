@@ -13,6 +13,7 @@ use gaodaotext::*;
 
 // Embed the image data directly into the binary
 const ICON_DATA: &[u8] = include_bytes!("../assets/images/book-cover.jpg");
+
 #[derive(Default, Debug)]
 struct Keys {
     up: Trigram,
@@ -42,7 +43,7 @@ struct Args {
 
     /// Whether to show welcome picture
     #[arg(short, long)]
-    silent: bool,
+    textonly: bool,
 }
 
 fn welcome_pic() -> Result<()> {
@@ -52,7 +53,7 @@ fn welcome_pic() -> Result<()> {
     // Configure how to display the image
     let conf = Config {
         // Automatically fit to terminal width while maintaining aspect ratio
-        width: Some(80),  // you can adjust this value
+        width: Some(60),  // you can adjust this value
         height: None,     // will be calculated automatically
         // Set to true if your terminal has a dark background
         transparent: true,
@@ -72,6 +73,39 @@ fn welcome_pic() -> Result<()> {
     Ok(())
 }
 
+fn show_hexagram_glyphs(hexagram: &Hexagram) -> Result<()> {
+    // clean up the terminal
+    clearscreen::clear()?;
+
+
+    let glyphs = get_gua_glyphs(hexagram);
+    for (name, _) in glyphs.iter() {
+        if name.is_empty() {
+            break;
+        }
+        println!("{}", name);
+    }
+
+    let mut x = 10;
+    for (name, img) in glyphs {
+        if name.is_empty() {
+            break;
+        }
+
+        let conf = Config {
+            x: x,
+            y: 0,
+            width: Some(20),
+            height: None,
+            transparent: true,
+            ..Default::default()
+        };
+        viuer::print(&image::load_from_memory(img)?, &conf)?;
+        println!();
+        x += 24;
+    }
+    Ok(())
+}
 
 fn select_gua(prompt: &str) -> u8 {
     inquire::Select::new(prompt, vec!["1 ☰ 乾/天 (Qian/Heaven)",
@@ -113,6 +147,7 @@ fn select_yao(prompt: &str) -> u8 {
 fn main() -> Result<()> {
     let mut keys = Keys::default();
     let mut show_changed = false;
+    let mut show_pics = false;
 
     // peek the cli args before parsing them
     let ori_args :Vec<_> = std::env::args().collect();
@@ -130,8 +165,9 @@ fn main() -> Result<()> {
     } else {
         let args = Args::parse();
 
-        if !args.silent {
+        if !args.textonly {
             welcome_pic();
+            show_pics = true;
         }
         if args.changed {
             show_changed = true;
@@ -147,8 +183,12 @@ fn main() -> Result<()> {
     }
 
     let hexagram = Hexagram::from_up_down(keys.up, keys.down);
-    let md_gua = get_gua_oracle_md(hexagram.order)?;
-    let md_yao = get_yao_oracle_md(hexagram.order, keys.yao)?;
+    let md_gua = get_gua_oracle_md(&hexagram)?;
+    let md_yao = get_yao_oracle_md(&hexagram, keys.yao)?;
+
+    if show_pics {
+        show_hexagram_glyphs(&hexagram)?;
+    }
     
     // Print the formatted markdown
     let mut skin = MadSkin::default();
@@ -162,7 +202,7 @@ fn main() -> Result<()> {
 
     if show_changed {
         let changed_hexagram = hexagram.get_change(keys.yao);
-        let md_changed_gua = get_gua_oracle_md(changed_hexagram.order)?;
+        let md_changed_gua = get_gua_oracle_md(&changed_hexagram)?;
         skin.print_text(&format!("---\n# 變卦\n#{}", md_changed_gua));
     }
 
