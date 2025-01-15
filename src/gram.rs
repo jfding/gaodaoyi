@@ -22,6 +22,8 @@ pub enum TrigramName {
     Gen = '☶' as isize,   // 艮 Mountain
     Kun = '☷' as isize,   // 坤 Earth
 }
+
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Trigram {
     pub name: TrigramName,
@@ -38,11 +40,11 @@ impl Default for Trigram {
 }
 impl Trigram {
     pub fn from_name(name: TrigramName) -> Self {
-        let order = name.clone() as u8 - TrigramName::Qian as u8 + 1;
+        let order = name as u32 - TrigramName::Qian as u32 + 1;
         Trigram {
-            name: name.clone(),
+            name,
             unicode: char::from_u32(name as u32).unwrap(),
-            order: order,
+            order: order as u8,
             cn_name: TRIGRAM_NAMES[order as usize - 1].0.to_string(),
             py_name: TRIGRAM_NAMES[order as usize - 1].1.to_string(),
             meaning: TRIGRAM_NAMES[order as usize - 1].2.to_string(),
@@ -70,7 +72,7 @@ impl Trigram {
         }
         let yao_index :usize = yao as usize - 1;
 
-        let mut yao_binary = format!("{:03b}", self.order-1);
+        let yao_binary = format!("{:03b}", self.order-1);
         let mut yao_binary_vec = yao_binary.chars().collect::<Vec<char>>();
         yao_binary_vec[yao_index] = if yao_binary_vec[yao_index] == '0' { '1' } else { '0' };
         let yao_binary = yao_binary_vec.iter().collect::<String>();
@@ -164,7 +166,7 @@ pub enum HexagramName {
 }
 impl Display for HexagramName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", char::from_u32(self.clone() as u32).unwrap())
+        write!(f, "{}", char::from_u32(*self as u32).unwrap())
     }
 }
 
@@ -335,6 +337,7 @@ pub fn list_hexagrams() {
 }
 */
 
+#[allow(dead_code)]
 #[derive(Debug)]
 pub struct Hexagram {
     pub name: HexagramName,
@@ -348,11 +351,11 @@ pub struct Hexagram {
 }
 impl Hexagram {
     pub fn from_name(name: HexagramName) -> Self {
-        let order = name.clone() as u8 - HexagramName::Qian as u8 + 1;
+        let order = name as u32 - HexagramName::Qian as u32 + 1;
         Hexagram {
-            name: name.clone(),
+            name,
             unicode: char::from_u32(name as u32).unwrap(),
-            order: order,
+            order: order as u8,
             cn_name: HEXAGRAM_NAMES[order as usize - 1].0.to_string(),
             long_name: HEXAGRAM_NAMES[order as usize - 1].1.to_string(),
             meaning: HEXAGRAM_NAMES[order as usize - 1].2.to_string(),

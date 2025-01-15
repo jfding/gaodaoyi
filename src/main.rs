@@ -1,9 +1,7 @@
 use clap::Parser;
 use viuer::Config;
 use anyhow::Result;
-use image;
 use termimad::*;
-use clearscreen;
 
 mod gram;
 use gram::*;
@@ -93,7 +91,7 @@ fn show_hexagram_glyphs(hexagram: &Hexagram) -> Result<()> {
         }
 
         let conf = Config {
-            x: x,
+            x,
             y: 0,
             width: Some(20),
             height: None,
@@ -145,13 +143,12 @@ fn select_yao(prompt: &str) -> u8 {
 }
 
 fn main() -> Result<()> {
-    let mut keys = Keys::default();
     let mut show_changed = false;
     let mut show_pics = false;
 
     // peek the cli args before parsing them
     let ori_args :Vec<_> = std::env::args().collect();
-    if ori_args.len() == 4 && ori_args.iter().skip(1).all(|arg| arg.parse::<u8>().is_ok()) {
+    let keys = if ori_args.len() == 4 && ori_args.iter().skip(1).all(|arg| arg.parse::<u8>().is_ok()) {
         // All arguments are valid numbers
         let numbers :Vec<_> = ori_args.iter().skip(1).map(|arg| arg.parse::<u8>().unwrap()).collect();
         if numbers[0] > 8 || numbers[1] > 8 || numbers[2] > 6 {
@@ -159,14 +156,14 @@ fn main() -> Result<()> {
             return Ok(());
         }
 
-        keys = Keys { up: Trigram::from_order(numbers[0]),
+        Keys { up: Trigram::from_order(numbers[0]),
                       down: Trigram::from_order(numbers[1]),
-                      yao: numbers[2] };
+                      yao: numbers[2] }
     } else {
         let args = Args::parse();
 
         if !args.textonly {
-            welcome_pic();
+            welcome_pic()?;
             show_pics = true;
         }
         if args.changed {
@@ -177,10 +174,10 @@ fn main() -> Result<()> {
         let down = args.down.unwrap_or_else(|| select_gua("請選擇下卦"));
         let yao = args.yao.unwrap_or_else(|| select_yao("請選擇變爻"));
 
-        keys = Keys { up: Trigram::from_order(up),
+        Keys { up: Trigram::from_order(up),
                       down: Trigram::from_order(down),
-                      yao };
-    }
+                      yao }
+    };
 
     let hexagram = Hexagram::from_up_down(keys.up, keys.down);
     let md_gua = get_gua_oracle_md(&hexagram)?;

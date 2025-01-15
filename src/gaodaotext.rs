@@ -1,6 +1,4 @@
-use serde::Deserialize;
-use serde::Serialize;
-use serde_json;
+use serde::{Deserialize, Serialize};
 use anyhow::Result;
 use tera::{Tera, Context};
 use crate::gram::Hexagram;
@@ -365,8 +363,10 @@ pub const ORACLE_YAO_TEMPLATE: &str = include_str!("../assets/templates/oracle_y
 
 #[derive(Default, Clone, Deserialize, Serialize)]
 pub struct Case {
-    pub Q: String,
-    pub A: Vec<String>,
+    #[serde(rename = "Q")]
+    pub q: String,
+    #[serde(rename = "A")]
+    pub a: Vec<String>,
 }
 
 #[derive(Default, Clone, Deserialize)]
@@ -379,6 +379,7 @@ pub struct Yao {
     pub cases: Vec<Case>,
 }
 
+#[allow(dead_code)]
 #[derive(Default, Deserialize)]
 pub struct HexagramOracle {
     pub order: String,
@@ -437,7 +438,6 @@ pub fn get_yao_oracle(hexagram: &Hexagram, yao: u8) -> Result<Yao> {
 
 pub fn get_yao_oracle_md(hexagram: &Hexagram, yao: u8) -> Result<String> {
     let yao_oracle = get_yao_oracle(hexagram, yao)?;
-
     let mut tmpl = Tera::default();
     tmpl.add_raw_template("OracleYao", ORACLE_YAO_TEMPLATE)?;
 
