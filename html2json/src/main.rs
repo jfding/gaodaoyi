@@ -67,6 +67,8 @@ struct Hexagram {
     #[serde(rename = "daxiang-explain")]
     daxiang_explain: Vec<String>,
     guazhan: Vec<String>,
+    glyphs: Vec<String>,
+
     yaos: Vec<Yao>,
 }
 
@@ -84,16 +86,15 @@ fn main() -> Result<()> {
     let mut files = glob::glob(inputdir.join("Section*.html").to_str().unwrap())?;
     while let Some(file) = files.next() {
         let path = file.unwrap();
-        let output = outputdir.join(path.file_stem().unwrap().to_str().unwrap().to_string() + ".json");
         if path.is_file() {
             println!("Processing: {:?}", path);
-            convert_one(&path, &output)?;
+            convert_one(&inputdir, &path, &outputdir)?;
         }
     }
 
     Ok(())
 }
-fn convert_one(input: &PathBuf, output: &PathBuf) -> Result<()> {
+fn convert_one(inputdir: &PathBuf, input: &PathBuf, outputdir: &PathBuf) -> Result<()> {
     // Read HTML file
     let html_content = fs::read_to_string(input)?;
     let document = Html::parse_document(&html_content);
@@ -102,9 +103,12 @@ fn convert_one(input: &PathBuf, output: &PathBuf) -> Result<()> {
     let mut hexagram = Hexagram::default();
 
     parse_hexagram(&document, &mut hexagram);
+    extract_glyphs(inputdir, outputdir, &document, &mut hexagram);
 
     // Write to JSON file
     let json = serde_json::to_string_pretty(&hexagram)?;
+
+    let output = outputdir.join(format!("gd{}.json", hexagram.order));
     fs::write(output, json)?;
 
     Ok(())
@@ -119,6 +123,7 @@ fn parse_hexagram(document: &Html, hexagram: &mut Hexagram) {
         let mut text = part.text().collect::<String>().trim().to_string();
         let re = regex::Regex::new(r"\s*［\d+］\s*").unwrap();
         text = re.replace_all(&text, "").to_string();
+        text = text.replace("【占】　　", "");
         text = text.replace("【占】　", "");
         text = text.replace("○　", "");
         text = text.replace("\n ", "◻️");
@@ -266,6 +271,39 @@ fn parse_hexagram(document: &Html, hexagram: &mut Hexagram) {
             }
             _ => {
                 panic!("Unexpected step: {}", class);
+            }
+        }
+    }
+}
+
+fn extract_glyphs(input_path: &PathBuf, output_path: &PathBuf, document: &Html, hexagram: &mut Hexagram) {
+    // Implementation
+    let p_selector = Selector::parse("p").unwrap();
+    let mut part_iter = document.select(&p_selector).peekable();
+    while let Some(part) = part_iter.next() {
+        let class = part.attr("class").unwrap();
+        if class == "picture" {
+            let img = part.select(&Selector::parse("img").unwrap()).next().unwrap();
+            let src = img.attr("src").unwrap();
+
+            if let Some(nextp) = part_iter.next() {
+                if nextp.attr("class").unwrap() == "tz" {
+                    let mut text = nextp.text().collect::<String>().trim().to_string();
+                    if text.contains("文") || text.contains("书") || text.contains("体") {
+                        text = text.replace("▲　", "");
+                        let newfile = format!("gd{}_{}.jpg", hexagram.order, text);
+                        let glyph_path = PathBuf::from(input_path).join(&src);
+                        let newpath = PathBuf::from(output_path).join(&newfile);
+                        println!("COPY: {:?} -> {:?}", glyph_path, newpath);
+                        if !newpath.exists() {
+                            std::fs::copy(&glyph_path, &newpath).unwrap();
+                        }
+                        hexagram.glyphs.push(newfile);
+                    } else {
+                        println!("IGNORE: {:?}", text);
+                    }
+
+                }
             }
         }
     }
