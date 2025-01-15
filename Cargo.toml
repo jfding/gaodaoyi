@@ -1,6 +1,6 @@
 [package]
 name = "gaodaoyi"
-version = "0.9.0"
+version = "0.10.0"
 edition = "2021"
 
 [dependencies]
@@ -20,3 +20,6 @@ members = [
     "epub2html",
     "html2json"
 ]
+
+[profile.release]
+strip = true
