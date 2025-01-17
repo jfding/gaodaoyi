@@ -72,17 +72,20 @@ fn welcome_pic() -> Result<()> {
 }
 
 fn show_hexagram_glyphs(hexagram: &Hexagram) -> Result<()> {
-    // clean up the terminal
-    clearscreen::clear()?;
-
-
     let glyphs = get_gua_glyphs(hexagram);
+
+    if glyphs.iter().all(|(n, _)| n.is_empty()) {
+        return Ok(());
+    }
+
+    let mut title_line = "\n".to_string();
     for (name, _) in glyphs.iter() {
         if name.is_empty() {
             break;
         }
-        println!("{}", name);
+        title_line.push_str(&format!("\t{}\t", name));
     }
+    println!("{}", title_line);
 
     let mut x = 10;
     for (name, img) in glyphs {
@@ -92,7 +95,7 @@ fn show_hexagram_glyphs(hexagram: &Hexagram) -> Result<()> {
 
         let conf = Config {
             x,
-            y: 0,
+            y: 3,
             width: Some(20),
             height: None,
             transparent: true,
@@ -102,6 +105,7 @@ fn show_hexagram_glyphs(hexagram: &Hexagram) -> Result<()> {
         println!();
         x += 24;
     }
+    println!();
     Ok(())
 }
 
@@ -183,9 +187,6 @@ fn main() -> Result<()> {
     let md_gua = get_gua_oracle_md(&hexagram)?;
     let md_yao = get_yao_oracle_md(&hexagram, keys.yao)?;
 
-    if show_pics {
-        show_hexagram_glyphs(&hexagram)?;
-    }
     
     // Print the formatted markdown
     let mut skin = MadSkin::default();
@@ -194,13 +195,29 @@ fn main() -> Result<()> {
     skin.italic.set_fg(rgb(215, 255, 135));
     skin.bullet = StyledChar::from_fg_char(rgb(255, 187, 0), '•');
 
+    if show_pics {
+        // clean up the terminal
+        clearscreen::clear()?;
+    }
+    skin.print_text(&format!("# {} **{}** ({})",
+                                                hexagram.unicode,
+                                                hexagram.long_name,
+                                                hexagram.order));
+    if show_pics {
+        show_hexagram_glyphs(&hexagram)?;
+    }
+
     skin.print_text(&md_gua);
     skin.print_text(&md_yao);
 
     if show_changed {
         let changed_hexagram = hexagram.get_change(keys.yao);
         let md_changed_gua = get_gua_oracle_md(&changed_hexagram)?;
-        skin.print_text(&format!("---\n# 變卦\n#{}", md_changed_gua));
+        skin.print_text(&format!("---\n# 變卦: {} **{}** ({})",
+                                                changed_hexagram.unicode,
+                                                changed_hexagram.long_name,
+                                                changed_hexagram.order));
+        skin.print_text(&md_changed_gua);
     }
 
     Ok(())

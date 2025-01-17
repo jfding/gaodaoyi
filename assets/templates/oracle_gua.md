@@ -1,4 +1,3 @@
-# {{ unicode }} **{{ long_name }}** ({{ order }})
 
 ## 卦意
 *{{ summary }}*
