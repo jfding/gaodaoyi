@@ -126,7 +126,7 @@ fn parse_hexagram(document: &Html, hexagram: &mut Hexagram) {
         text = text.replace("【占】　　", "");
         text = text.replace("【占】　", "");
         text = text.replace("○　", "");
-        text = text.replace("\n ", "◻️");
+        text = text.replace("\n ", "◻️"); // ⬛  ⬜  ⚪ ⚫ ♦ ♦ ♦
         text
     }
 
