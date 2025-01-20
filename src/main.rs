@@ -178,7 +178,9 @@ fn main() -> Result<()> {
             for order in 1..=64 {
                 let hexagram = Hexagram::from_order(order);
                 let md_oracle = get_gua_oracle(&hexagram)?;
-                println!("{} {}", &hexagram, md_oracle.guaci);
+                let guaci = md_oracle.guaci.split("：").nth(1).unwrap();
+                let padding = " ".repeat(5 - hexagram.cn_name.len()/2);
+                println!("{} ：{}{}", &hexagram, padding, guaci);
             }
             return Ok(());
         }
@@ -203,14 +205,13 @@ fn main() -> Result<()> {
         let yao = args.yao.unwrap_or_else(|| select_yao("請選擇變爻"));
 
         Keys { up: Trigram::from_order(up),
-                      down: Trigram::from_order(down),
-                      yao }
+               down: Trigram::from_order(down),
+               yao }
     };
 
     let hexagram = Hexagram::from_up_down(keys.up, keys.down);
     let md_gua = get_gua_oracle_md(&hexagram)?;
     let md_yao = get_yao_oracle_md(&hexagram, keys.yao)?;
-
     
     // Print the formatted markdown
     let mut skin = MadSkin::default();
@@ -232,6 +233,7 @@ fn main() -> Result<()> {
     }
 
     skin.print_text(&md_gua);
+    skin.print_text("---\n# 變爻\n\n");
     skin.print_text(&md_yao);
 
     if show_changed {
