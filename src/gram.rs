@@ -449,20 +449,16 @@ impl Hexagram {
             panic!("Invalid yao number");
         }
     }
-
-    // list all hexagrams
-    pub fn list_all() {
-        for order in 1..=64 {
-            let hexagram = Hexagram::from_order(order);
-            println!("({}{} / {}{}) => [{:02}] {} {}",
-                hexagram.up.unicode,
-                hexagram.up.cn_name,
-                hexagram.down.unicode,
-                hexagram.down.cn_name,
-                hexagram.order,
-                hexagram.unicode,
-                hexagram.long_name);
-        }
+}
+impl Display for Hexagram {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f,"({}{} / {}{}) => [{:02}] {} {}",
+            self.up.unicode,
+            self.up.cn_name,
+            self.down.unicode,
+            self.down.cn_name,
+            self.order,
+            self.unicode,
+            self.long_name)
     }
-
 }

@@ -46,6 +46,10 @@ struct Args {
     /// List all hexagrams
     #[arg(short, long)]
     list: bool,
+
+    /// list all Guaci
+    #[arg(short, long)]
+    guaci: bool,
 }
 
 fn welcome_pic() -> Result<()> {
@@ -170,8 +174,19 @@ fn main() -> Result<()> {
     } else {
         let args = Args::parse();
 
+        if args.guaci {
+            for order in 1..=64 {
+                let hexagram = Hexagram::from_order(order);
+                let md_oracle = get_gua_oracle(&hexagram)?;
+                println!("{} {}", &hexagram, md_oracle.guaci);
+            }
+            return Ok(());
+        }
+
         if args.list {
-            Hexagram::list_all();
+            for order in 1..=64 {
+                println!("{}", Hexagram::from_order(order));
+            }
             return Ok(());
         }
 
