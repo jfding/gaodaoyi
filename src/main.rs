@@ -42,6 +42,10 @@ struct Args {
     /// Whether to show welcome picture
     #[arg(short, long)]
     textonly: bool,
+
+    /// List all hexagrams
+    #[arg(short, long)]
+    list: bool,
 }
 
 fn welcome_pic() -> Result<()> {
@@ -165,6 +169,11 @@ fn main() -> Result<()> {
                       yao: numbers[2] }
     } else {
         let args = Args::parse();
+
+        if args.list {
+            Hexagram::list_all();
+            return Ok(());
+        }
 
         if !args.textonly {
             welcome_pic()?;

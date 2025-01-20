@@ -449,4 +449,20 @@ impl Hexagram {
             panic!("Invalid yao number");
         }
     }
+
+    // list all hexagrams
+    pub fn list_all() {
+        for order in 1..=64 {
+            let hexagram = Hexagram::from_order(order);
+            println!("({}{} / {}{}) => [{:02}] {} {}",
+                hexagram.up.unicode,
+                hexagram.up.cn_name,
+                hexagram.down.unicode,
+                hexagram.down.cn_name,
+                hexagram.order,
+                hexagram.unicode,
+                hexagram.long_name);
+        }
+    }
+
 }
