@@ -20,6 +20,9 @@ members = [
     "epub2html",
     "html2json"
 ]
+exclude = [
+    "gaodaoyi-gui"
+]
 
 [profile.release]
 strip = true
