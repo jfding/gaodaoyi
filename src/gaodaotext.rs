@@ -398,6 +398,11 @@ pub struct HexagramOracle {
     pub yaos: Vec<Yao>,
 }
 
+pub fn get_gua_oracle_json(hexagram: &Hexagram) -> Result<String> {
+    let order = hexagram.order;
+    Ok(String::from_utf8_lossy(HEXAGRAM_DATA[order as usize - 1]).into_owned())
+}
+
 pub fn get_gua_oracle(hexagram: &Hexagram) -> Result<HexagramOracle> {
     let order = hexagram.order;
     let hexagram_oracle: HexagramOracle = serde_json::from_slice(HEXAGRAM_DATA[order as usize - 1])?;

@@ -9,6 +9,8 @@ use gram::*;
 mod gaodaotext;
 use gaodaotext::*;
 
+mod web;
+
 // Embed the image data directly into the binary
 const ICON_DATA: &[u8] = include_bytes!("../assets/images/book-cover.jpg");
 
@@ -50,6 +52,10 @@ struct Args {
     /// list all Guaci
     #[arg(short, long)]
     guaci: bool,
+
+    /// server mode to launch a web UI
+    #[arg(short, long)]
+    server: bool,
 }
 
 fn welcome_pic() -> Result<()> {
@@ -174,13 +180,19 @@ fn main() -> Result<()> {
     } else {
         let args = Args::parse();
 
+        if args.server {
+            println!("server mode");
+            let _ = web::start_server();
+            return Ok(());
+        }
+
         if args.guaci {
             for order in 1..=64 {
                 let hexagram = Hexagram::from_order(order);
                 let md_oracle = get_gua_oracle(&hexagram)?;
                 let guaci = md_oracle.guaci.split("：").nth(1).unwrap();
                 let padding = " ".repeat(5 - hexagram.cn_name.len()/2);
-                println!("{} ：{}{}", &hexagram, padding, guaci);
+                println!("{}{}：{}", &hexagram, padding, guaci);
             }
             return Ok(());
         }
