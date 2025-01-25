@@ -135,7 +135,7 @@ fn select_gua(prompt: &str) -> u8 {
         .with_vim_mode(true)
         .with_page_size(8)
         .with_help_message("h/j/k/l | ←↑↓→ | <enter> | ctrl+c")
-        .with_render_config(inquire::ui::RenderConfig::default().with_highlighted_option_prefix("󰚀️".into()))
+        .with_render_config(inquire::ui::RenderConfig::default().with_highlighted_option_prefix("️☯".into()))
         .prompt()
         .unwrap_or_else(|_e| { std::process::exit(1); })
         .split(" ")
@@ -150,7 +150,7 @@ fn select_yao(prompt: &str) -> u8 {
         .with_vim_mode(true)
         .with_page_size(6)
         .with_help_message("h/j/k/l | ←↑↓→ | <enter> | ctrl+c")
-        .with_render_config(inquire::ui::RenderConfig::default().with_highlighted_option_prefix("󰚀".into()))
+        .with_render_config(inquire::ui::RenderConfig::default().with_highlighted_option_prefix("☯".into()))
         .prompt()
         .unwrap_or_else(|_e| { std::process::exit(1); })
         .split(" ")
@@ -181,7 +181,7 @@ fn main() -> Result<()> {
         let args = Args::parse();
 
         if args.server {
-            println!("server mode");
+            print!("server mode: ");
             let _ = web::start_server();
             return Ok(());
         }
