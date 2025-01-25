@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>高島易斷</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 16px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        code {
+            font-family: monospace;
+            font-size: 1.6em;
+            color: #800000;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+        }
+        .hexagram {
+            font-size: 2em;
+            margin: 10px 0;
+        }
+        .hexagramorder {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        .section {
+            font-size: 1.2em;
+            margin: 10px 0;
+            font-weight: bold;
+            color: #3030e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>高島易斷</h1>
+        <div class="form-group">
+            <label for="up">上卦 (Upper Trigram):</label>
+            <select id="up">
+                <option value="1">1 ☰ 乾/天 (Qian/Heaven)</option>
+                <option value="2">2 ☱ 兌/澤 (Dui/Lake)</option>
+                <option value="3">3 ☲ 離/火 (Li/Fire)</option>
+                <option value="4">4 ☳ 震/雷 (Zhen/Thunder)</option>
+                <option value="5">5 ☴ 巽/風 (Xun/Wind)</option>
+                <option value="6">6 ☵ 坎/水 (Kan/Water)</option>
+                <option value="7">7 ☶ 艮/山 (Gen/Mountain)</option>
+                <option value="8">8 ☷ 坤/地 (Kun/Earth)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="down">下卦 (Lower Trigram):</label>
+            <select id="down">
+                <option value="1">1 ☰ 乾/天 (Qian/Heaven)</option>
+                <option value="2">2 ☱ 兌/澤 (Dui/Lake)</option>
+                <option value="3">3 ☲ 離/火 (Li/Fire)</option>
+                <option value="4">4 ☳ 震/雷 (Zhen/Thunder)</option>
+                <option value="5">5 ☴ 巽/風 (Xun/Wind)</option>
+                <option value="6">6 ☵ 坎/水 (Kan/Water)</option>
+                <option value="7">7 ☶ 艮/山 (Gen/Mountain)</option>
+                <option value="8">8 ☷ 坤/地 (Kun/Earth)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="yao">變爻 (Changing Line):</label>
+            <select id="yao">
+                <option value="1">1 初爻</option>
+                <option value="2">2 二爻</option>
+                <option value="3">3 三爻</option>
+                <option value="4">4 四爻</option>
+                <option value="5">5 五爻</option>
+                <option value="6">6 上爻</option>
+            </select>
+        </div>
+
+        <button onclick="getReading()">獲取斷語</button>
+
+        <div id="result" class="result">
+            <h2 class="section">本卦</h2>
+            <p><span id="unicode" class="hexagram"></span>
+               <span id="name" class="hexagram"></span>
+               （<span id="order" class="hexagramorder"></span>）</p>
+            <p><div id="hexagram_guaci"></div></p>
+
+            <h2 class="section">變爻</h2>
+            <p><div id="hexagram_yaoci"></div></p>
+
+            <h2 class="section">變卦</h2>
+            <p><span id="c_unicode" class="hexagram"></span>
+               <span id="c_name" class="hexagram"></span>
+               （<span id="c_order" class="hexagramorder"></span>）</p>
+            <p><div id="c_hexagram_guaci"></div></p>
+        </div>
+    </div>
+
+    <script>
+        async function getReading() {
+            const up = document.getElementById('up').value;
+            const down = document.getElementById('down').value;
+            const yao = document.getElementById('yao').value;
+
+            try {
+                const guaci_response = await fetch('/hexagram_gua', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ up: parseInt(up), down: parseInt(down), yao: parseInt(yao) })
+                });
+
+                const guaci_data = await guaci_response.json();
+                console.log(guaci_data);
+
+                // Display results
+                document.getElementById('result').style.display = 'block';
+
+                document.getElementById('unicode').textContent = guaci_data.unicode;
+                document.getElementById('name').textContent = guaci_data.name;
+                document.getElementById('order').textContent = guaci_data.order;
+                document.getElementById('hexagram_guaci').innerHTML = guaci_data.html;
+
+                // yaoci
+                const yaoci_response = await fetch('/hexagram_yao', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ up: parseInt(up), down: parseInt(down), yao: parseInt(yao) })
+                });
+
+                const yaoci_data = await yaoci_response.json();
+                console.log(yaoci_data);
+                document.getElementById('hexagram_yaoci').innerHTML = yaoci_data.html;
+
+                // changed hexagram Guaci
+                const c_guaci_response = await fetch('/hexagram_gua_alt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ up: parseInt(down), down: parseInt(up), yao: parseInt(yao) })
+                });
+                const c_guaci_data = await c_guaci_response.json();
+                console.log(c_guaci_data);
+
+                document.getElementById('c_unicode').textContent = c_guaci_data.unicode;
+                document.getElementById('c_name').textContent = c_guaci_data.name;
+                document.getElementById('c_order').textContent = c_guaci_data.order;
+                document.getElementById('c_hexagram_guaci').innerHTML = c_guaci_data.html;
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while getting the reading');
+            }
+        }
+    </script>
+</body>
+</html>

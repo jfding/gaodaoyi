@@ -398,7 +398,8 @@ pub struct HexagramOracle {
     pub yaos: Vec<Yao>,
 }
 
-pub fn get_gua_oracle_json(hexagram: &Hexagram) -> Result<String> {
+#[allow(dead_code)]
+fn get_gua_oracle_json(hexagram: &Hexagram) -> Result<String> {
     let order = hexagram.order;
     Ok(String::from_utf8_lossy(HEXAGRAM_DATA[order as usize - 1]).into_owned())
 }

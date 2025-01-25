@@ -6,7 +6,7 @@
 * {{ line }}
 {% endfor %}
 ## 易傳
-***{{ xiaoxiang }}***
+**{{ xiaoxiang }}**
 
 ## 釋義
 {% for line in yaoci_explain %}

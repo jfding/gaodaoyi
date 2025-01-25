@@ -12,14 +12,14 @@
 {% endfor %}
 {% endif %}
 ## 易傳
-***{{ tuan }}***
+**{{ tuan }}**
 
 ## 釋義
 {% for line in tuan_explain %}
 * {{ line }}
 {% endfor %}
 ## 易傳
-***{{ daxiang }}***
+**{{ daxiang }}**
 
 ## 釋義
 {% for line in daxiang_explain %}

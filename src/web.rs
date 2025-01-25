@@ -2,7 +2,7 @@ use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 
 use crate::gram::{Trigram, Hexagram};
-use crate::gaodaotext::{get_gua_oracle_json, get_yao_oracle};
+use crate::gaodaotext::*;
 
 #[derive(Serialize, Deserialize)]
 struct HexagramRequest {
@@ -15,42 +15,50 @@ async fn index() -> impl Responder {
     HttpResponse::Ok().body(include_str!("../assets/web/index.html"))
 }
 
-async fn get_hexagram(req: web::Json<HexagramRequest>) -> impl Responder {
+async fn get_hexagram_gua(req: web::Json<HexagramRequest>) -> impl Responder {
+    let up = Trigram::from_order(req.up);
+    let down = Trigram::from_order(req.down);
+
+    let hexagram = Hexagram::from_up_down(up, down);
+
+    let html = markdown::to_html(&get_gua_oracle_md(&hexagram).unwrap());
+
+    HttpResponse::Ok().json(serde_json::json!({
+        "html": html,
+        "unicode": hexagram.unicode,
+        "name": hexagram.long_name,
+        "order": hexagram.order,
+    }))
+}
+
+async fn get_hexagram_gua_alt(req: web::Json<HexagramRequest>) -> impl Responder {
+    let up = Trigram::from_order(req.up);
+    let down = Trigram::from_order(req.down);
+    let yao = req.yao;
+
+    let hexagram = Hexagram::from_up_down(up, down).get_change(yao);
+
+    let html = markdown::to_html(&get_gua_oracle_md(&hexagram).unwrap());
+
+    HttpResponse::Ok().json(serde_json::json!({
+        "html": html,
+        "unicode": hexagram.unicode,
+        "name": hexagram.long_name,
+        "order": hexagram.order,
+    }))
+}
+async fn get_hexagram_yao(req: web::Json<HexagramRequest>) -> impl Responder {
     let up = Trigram::from_order(req.up);
     let down = Trigram::from_order(req.down);
     let yao = req.yao;
 
     let hexagram = Hexagram::from_up_down(up, down);
 
-    //let oracle = get_gua_oracle(&hexagram).unwrap();
-    //let yao_oracle = get_yao_oracle(&hexagram, req.yao).unwrap();
-    //let changed = hexagram.get_change(req.yao);
-    //let changed_oracle = get_gua_oracle(&changed).unwrap();
-    
-    let raw_json = get_gua_oracle_json(&hexagram).unwrap();
+    let html = markdown::to_html(&get_yao_oracle_md(&hexagram, yao).unwrap());
 
-    /*
-    let response = serde_json::json!({
-        "hexagram": {
-            "unicode": hexagram.unicode,
-            "name": hexagram.long_name,
-            "order": hexagram.order,
-            "oracle": oracle
-        },
-        "yao": {
-            "position": req.yao,
-            "oracle": yao_oracle
-        },
-        "changed": {
-            "unicode": changed.unicode, 
-            "name": changed.long_name,
-            "order": changed.order,
-            "oracle": changed_oracle
-        }
-    });
-    */
-
-    HttpResponse::Ok().json(serde_json::from_str::<serde_json::Value>(&raw_json).unwrap())
+    HttpResponse::Ok().json(serde_json::json!({
+        "html": html,
+    }))
 }
 
 #[actix_web::main]
@@ -60,7 +68,9 @@ pub async fn start_server() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .route("/", web::get().to(index))
-            .route("/hexagram", web::post().to(get_hexagram))
+            .route("/hexagram_gua", web::post().to(get_hexagram_gua))
+            .route("/hexagram_yao", web::post().to(get_hexagram_yao))
+            .route("/hexagram_gua_alt", web::post().to(get_hexagram_gua_alt))
     })
     .bind("127.0.0.1:8080")?
     .run()
