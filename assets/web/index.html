@@ -126,14 +126,29 @@
             <p><div id="hexagram_yaoci"></div></p>
 
             <h2 class="section">變卦</h2>
+            <button onclick="toggleChangedHexagram()" class="fold-button" id="toggleButton">收起</button>
+            <div id="changedHexagramContent">
             <p><span id="c_unicode" class="hexagram"></span>
                <span id="c_name" class="hexagram"></span>
                （<span id="c_order" class="hexagramorder"></span>）</p>
             <p><div id="c_hexagram_guaci"></div></p>
+            </div>
         </div>
     </div>
 
     <script>
+        function toggleChangedHexagram() {
+            const changedHexagramContent = document.getElementById('changedHexagramContent');
+            const toggleButton = document.getElementById('toggleButton');
+            if (changedHexagramContent.style.display === 'none') {
+                changedHexagramContent.style.display = 'block';
+                toggleButton.textContent = '收起';
+            } else {
+                changedHexagramContent.style.display = 'none';
+                toggleButton.textContent = '展開';
+            }
+        }
+
         async function getReading() {
             const up = document.getElementById('up').value;
             const down = document.getElementById('down').value;
