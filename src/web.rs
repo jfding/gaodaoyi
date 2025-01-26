@@ -15,6 +15,12 @@ async fn index() -> impl Responder {
     HttpResponse::Ok().body(include_str!("../assets/web/index.html"))
 }
 
+async fn logo() -> impl Responder {
+    HttpResponse::Ok()
+        .content_type("image/jpeg")
+        .body(include_bytes!("../assets/images/book-cover.jpg").to_vec())
+}
+
 async fn get_hexagram_gua(req: web::Json<HexagramRequest>) -> impl Responder {
     let up = Trigram::from_order(req.up);
     let down = Trigram::from_order(req.down);
@@ -68,6 +74,7 @@ pub async fn start_server() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .route("/", web::get().to(index))
+            .route("/logo.jpg", web::get().to(logo))
             .route("/hexagram_gua", web::post().to(get_hexagram_gua))
             .route("/hexagram_yao", web::post().to(get_hexagram_yao))
             .route("/hexagram_gua_alt", web::post().to(get_hexagram_gua_alt))

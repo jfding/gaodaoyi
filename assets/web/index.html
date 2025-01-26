@@ -11,6 +11,13 @@
             padding: 16px;
             background-color: #f5f5f5;
         }
+        h1 {
+            text-align: center;
+        }
+        img {
+            width: 30%;
+            height: auto;
+        }
         .container {
             background-color: white;
             padding: 20px;
@@ -19,6 +26,16 @@
         }
         .form-group {
             margin-bottom: 15px;
+            flex: 1;
+            min-width: 200px;
+        }
+        .row {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
         }
         code {
             font-family: monospace;
@@ -72,7 +89,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>高島易斷</h1>
+        <h1><img src="logo.jpg" alt="高島易斷"/></h1>
+        <div class="row">
         <div class="form-group">
             <label for="up">上卦 (Upper Trigram):</label>
             <select id="up">
@@ -111,6 +129,7 @@
                 <option value="5">5 五爻</option>
                 <option value="6">6 上爻</option>
             </select>
+        </div>
         </div>
 
         <button onclick="getReading()">獲取斷語</button>
