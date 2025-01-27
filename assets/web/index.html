@@ -214,7 +214,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ up: parseInt(down), down: parseInt(up), yao: parseInt(yao) })
+                    body: JSON.stringify({ up: parseInt(up), down: parseInt(down), yao: parseInt(yao) })
                 });
                 const c_guaci_data = await c_guaci_response.json();
                 console.log(c_guaci_data);

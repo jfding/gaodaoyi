@@ -53,6 +53,7 @@ async fn get_hexagram_gua_alt(req: web::Json<HexagramRequest>) -> impl Responder
         "order": hexagram.order,
     }))
 }
+
 async fn get_hexagram_yao(req: web::Json<HexagramRequest>) -> impl Responder {
     let up = Trigram::from_order(req.up);
     let down = Trigram::from_order(req.down);

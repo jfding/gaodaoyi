@@ -1,10 +1,6 @@
 ## 爻辭
     {{ yaoci }}
 
-### 爻辭解
-{% for line in yaoci_explain %}
-* {{ line }}
-{% endfor %}
 ## 易傳
 **{{ xiaoxiang }}**
 
