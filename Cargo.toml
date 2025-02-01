@@ -23,7 +23,7 @@ members = [
     "html2json"
 ]
 exclude = [
-    "gaodaoyi-gui"
+    "App.Tauri"
 ]
 
 [profile.release]

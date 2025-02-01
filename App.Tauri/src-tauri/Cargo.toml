@@ -1,0 +1,22 @@
+[package]
+name = "gaodaoyi-tauri"
+version = "0.5.0"
+description = "高島易斷 GUI by Tauri"
+authors = ["JF Ding <jfding@gmail.com>"]
+edition = "2021"
+
+[lib]
+name = "gaodaoyi_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1.0.95"
+tera = { version = "1.20.0", default-features = false }
+markdown = "0.3.0"
