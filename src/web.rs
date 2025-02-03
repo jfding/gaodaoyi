@@ -24,16 +24,30 @@ async fn logo() -> impl Responder {
 async fn get_hexagram_gua(req: web::Json<HexagramRequest>) -> impl Responder {
     let up = Trigram::from_order(req.up);
     let down = Trigram::from_order(req.down);
-
     let hexagram = Hexagram::from_up_down(&up, &down);
 
     let html = markdown::to_html(&get_gua_oracle_md(&hexagram).unwrap());
+
+    let glyphs = get_gua_glyphs(&hexagram);
+    let mut gl_html = String::new();
+    for index in 0..glyphs.len() {
+        let (name, _) = glyphs[index];
+        if ! name.is_empty() {
+            gl_html += &format!("<span>{}</span><img src='/glyphs/{}/{}/{}' alt='{}' />",
+                name.to_owned()+":",
+                &hexagram.up.order,
+                &hexagram.down.order,
+                index,
+                name);
+        }
+    }
 
     HttpResponse::Ok().json(serde_json::json!({
         "html": html,
         "unicode": hexagram.unicode,
         "name": hexagram.long_name,
         "order": hexagram.order,
+        "glyphs": gl_html,
     }))
 }
 
@@ -41,16 +55,30 @@ async fn get_hexagram_gua_alt(req: web::Json<HexagramRequest>) -> impl Responder
     let up = Trigram::from_order(req.up);
     let down = Trigram::from_order(req.down);
     let yao = req.yao;
-
     let hexagram = Hexagram::from_up_down(&up, &down).get_change(yao);
 
     let html = markdown::to_html(&get_gua_oracle_md(&hexagram).unwrap());
+
+    let glyphs = get_gua_glyphs(&hexagram);
+    let mut gl_html = String::new();
+    for index in 0..glyphs.len() {
+        let (name, _) = glyphs[index];
+        if ! name.is_empty() {
+            gl_html += &format!("<span>{}</span><img src='/glyphs/{}/{}/{}' alt='{}' />",
+                name.to_owned()+":",
+                &hexagram.up.order,
+                &hexagram.down.order,
+                index,
+                name);
+        }
+    }
 
     HttpResponse::Ok().json(serde_json::json!({
         "html": html,
         "unicode": hexagram.unicode,
         "name": hexagram.long_name,
         "order": hexagram.order,
+        "glyphs": gl_html,
     }))
 }
 
@@ -62,26 +90,6 @@ async fn get_hexagram_yao(req: web::Json<HexagramRequest>) -> impl Responder {
     let hexagram = Hexagram::from_up_down(&up, &down);
 
     let html = markdown::to_html(&get_yao_oracle_md(&hexagram, yao).unwrap());
-
-    HttpResponse::Ok().json(serde_json::json!({
-        "html": html,
-    }))
-}
-
-async fn list_gua_glyphs(req: web::Json<HexagramRequest>) -> impl Responder {
-    let up = Trigram::from_order(req.up);
-    let down = Trigram::from_order(req.down);
-    let hexagram = Hexagram::from_up_down(&up, &down);
-
-    let glyphs = get_gua_glyphs(&hexagram);
-
-    let mut html = String::new();
-    for index in 0..glyphs.len() {
-        let (name, _) = glyphs[index];
-        if ! name.is_empty() {
-            html += &format!("<span>{}</span><img src='/glyphs/{}/{}/{}' alt='{}' />", name.to_owned()+":", &up.order, &down.order, index, name);
-        }
-    }
 
     HttpResponse::Ok().json(serde_json::json!({
         "html": html,
@@ -115,7 +123,6 @@ pub async fn start_server() -> std::io::Result<()> {
             .route("/hexagram_gua", web::post().to(get_hexagram_gua))
             .route("/hexagram_yao", web::post().to(get_hexagram_yao))
             .route("/hexagram_gua_alt", web::post().to(get_hexagram_gua_alt))
-            .route("/glyphs", web::post().to(list_gua_glyphs))
     })
     .bind("127.0.0.1:8080")?
     .run()
