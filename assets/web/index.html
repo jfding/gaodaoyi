@@ -10,9 +10,8 @@
     <div class="container">
         <h1><img src="logo.jpg" alt="高島易斷"/></h1>
         <div class="row">
-        <div class="form-group">
-            <label for="up">上卦 (Upper Trigram):</label>
-            <select id="up">
+            <select id="up" onchange="checkFormValidity()">
+                <option value="" disabled selected>上卦 (Upper Trigram):</option>
                 <option value="1">1 ☰ 乾/天 (Qian/Heaven)</option>
                 <option value="2">2 ☱ 兌/澤 (Dui/Lake)</option>
                 <option value="3">3 ☲ 離/火 (Li/Fire)</option>
@@ -22,11 +21,8 @@
                 <option value="7">7 ☶ 艮/山 (Gen/Mountain)</option>
                 <option value="8">8 ☷ 坤/地 (Kun/Earth)</option>
             </select>
-        </div>
-
-        <div class="form-group">
-            <label for="down">下卦 (Lower Trigram):</label>
-            <select id="down">
+            <select id="down" onchange="checkFormValidity()">
+                <option value="" disabled selected>下卦 (Lower Trigram):</option>
                 <option value="1">1 ☰ 乾/天 (Qian/Heaven)</option>
                 <option value="2">2 ☱ 兌/澤 (Dui/Lake)</option>
                 <option value="3">3 ☲ 離/火 (Li/Fire)</option>
@@ -36,11 +32,8 @@
                 <option value="7">7 ☶ 艮/山 (Gen/Mountain)</option>
                 <option value="8">8 ☷ 坤/地 (Kun/Earth)</option>
             </select>
-        </div>
-
-        <div class="form-group">
-            <label for="yao">變爻 (Changing Line):</label>
-            <select id="yao">
+            <select id="yao" onchange="checkFormValidity()">
+                <option value="" disabled selected>變爻 (Changing Line):</option>
                 <option value="1">1 初爻</option>
                 <option value="2">2 二爻</option>
                 <option value="3">3 三爻</option>
@@ -48,10 +41,8 @@
                 <option value="5">5 五爻</option>
                 <option value="6">6 上爻</option>
             </select>
-        </div>
-        </div>
 
-        <button onclick="getReading()">獲取斷語</button>
+        <button onclick="getReading()" id="submitButton" disabled>獲取斷語</button>
 
         <div id="result" class="result">
             <h2 class="section">本卦</h2>

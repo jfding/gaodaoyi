@@ -78,3 +78,13 @@ async function getReading() {
         alert('An error occurred while getting the reading');
     }
 }
+
+// check if the form is valid
+function checkFormValidity() {
+    const upValue = document.getElementById('up').value;
+    const downValue = document.getElementById('down').value;
+    const yaoValue = document.getElementById('yao').value;
+
+    const submitButton = document.getElementById('submitButton');
+    submitButton.disabled = !upValue || !downValue || !yaoValue;
+}
