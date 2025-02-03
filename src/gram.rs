@@ -338,7 +338,7 @@ pub fn list_hexagrams() {
 */
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Hexagram {
     pub name: HexagramName,
     pub unicode: char,
@@ -434,7 +434,7 @@ impl Hexagram {
         Hexagram::from_name(name)
     }
 
-    pub fn from_up_down(up: Trigram, down: Trigram) -> Self {
+    pub fn from_up_down(up: &Trigram, down: &Trigram) -> Self {
         let order = HEXAGRAM_UPDOWN.iter().position(|(u, d)| *u == up.name && *d == down.name).unwrap();
         Hexagram::from_order(order as u8 + 1)
     }   
@@ -442,9 +442,9 @@ impl Hexagram {
     // get the hexagram after flipping the specified yao
     pub fn get_change(&self, yao: u8) -> Self {
         if yao <= 3 {
-            Hexagram::from_up_down(self.up.clone(), self.down.get_change(yao))
+            Hexagram::from_up_down(&self.up, &self.down.get_change(yao))
         } else if yao <= 6 {
-            Hexagram::from_up_down(self.up.get_change(yao-3), self.down.clone())
+            Hexagram::from_up_down(&self.up.get_change(yao-3), &self.down)
         } else {
             panic!("Invalid yao number");
         }

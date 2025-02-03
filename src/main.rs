@@ -221,7 +221,7 @@ fn main() -> Result<()> {
                yao }
     };
 
-    let hexagram = Hexagram::from_up_down(keys.up, keys.down);
+    let hexagram = Hexagram::from_up_down(&keys.up, &keys.down);
     let md_gua = get_gua_oracle_md(&hexagram)?;
     let md_yao = get_yao_oracle_md(&hexagram, keys.yao)?;
     

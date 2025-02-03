@@ -1,5 +1,3 @@
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-
 use serde_json::json;
 use markdown;
 
@@ -68,10 +66,6 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![get_guaci, get_yaoci, get_guaci_alt])
-        .setup(|app| {
-            let webview_url = tauri::WebviewUrl::App("index.html".into());
-            Ok(())
-        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

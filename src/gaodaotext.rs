@@ -410,7 +410,7 @@ pub fn get_gua_oracle(hexagram: &Hexagram) -> Result<HexagramOracle> {
     Ok(hexagram_oracle)
 }
 
-pub fn get_gua_glyphs(hexagram: &Hexagram) -> Vec<(&str, &[u8])> {
+pub fn get_gua_glyphs(hexagram: &Hexagram) -> Vec<(&'static str, &'static [u8])> {
     ALL_HEXAGRAM_GLYPHS[hexagram.order as usize - 1].to_vec()
 }
 

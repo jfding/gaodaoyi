@@ -85,6 +85,35 @@
             font-weight: bold;
             color: #3030e0;
         }
+        .glyphs_container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 10px;
+            border: 1px dashed #ddd;
+            border-radius: 4px;
+            margin: 10px 0;
+            padding: 5px;
+        }
+        .glyphs_container span {
+            position: relative;
+            top: -5px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #603030;
+            margin-left: 10px;
+            margin-right: 5px;
+        }
+        .glyphs_container img {
+            width: 10%;
+            height: auto;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+        }
+        .glyphs_container img:hover {
+            image-rendering: pixelated;
+            transform: scaleX(-1);
+        }
     </style>
 </head>
 <body>
@@ -139,6 +168,7 @@
             <p><span id="unicode" class="hexagram"></span>
                <span id="name" class="hexagram"></span>
                （<span id="order" class="hexagramorder"></span>）</p>
+            <p class="glyphs_container" id="glyphs" display="none"></p>
             <p><div id="hexagram_guaci"></div></p>
 
             <hr>
@@ -175,6 +205,9 @@
             const down = document.getElementById('down').value;
             const yao = document.getElementById('yao').value;
 
+
+            document.getElementById('glyphs').style.display = 'none';
+
             try {
                 const guaci_response = await fetch('/hexagram_gua', {
                     method: 'POST',
@@ -185,7 +218,6 @@
                 });
 
                 const guaci_data = await guaci_response.json();
-                console.log(guaci_data);
 
                 // Display results
                 document.getElementById('result').style.display = 'block';
@@ -205,7 +237,6 @@
                 });
 
                 const yaoci_data = await yaoci_response.json();
-                console.log(yaoci_data);
                 document.getElementById('hexagram_yaoci').innerHTML = yaoci_data.html;
 
                 // changed hexagram Guaci
@@ -217,12 +248,24 @@
                     body: JSON.stringify({ up: parseInt(up), down: parseInt(down), yao: parseInt(yao) })
                 });
                 const c_guaci_data = await c_guaci_response.json();
-                console.log(c_guaci_data);
 
                 document.getElementById('c_unicode').textContent = c_guaci_data.unicode;
                 document.getElementById('c_name').textContent = c_guaci_data.name;
                 document.getElementById('c_order').textContent = c_guaci_data.order;
                 document.getElementById('c_hexagram_guaci').innerHTML = c_guaci_data.html;
+
+                const g_response = await fetch('/glyphs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ up: parseInt(up), down: parseInt(down), yao: parseInt(yao) })
+                });
+                const g_data = await g_response.json();
+                if (g_data.html != '') {
+                    document.getElementById('glyphs').innerHTML = g_data.html;
+                    document.getElementById('glyphs').style.display = 'block';
+                }
 
             } catch (error) {
                 console.error('Error:', error);
