@@ -9,7 +9,7 @@ fn get_guaci(up: &str, down: &str) -> String {
     let gram_up = gram::Trigram::from_order(up.parse::<u8>().unwrap_or(1));
     let gram_down = gram::Trigram::from_order(down.parse::<u8>().unwrap_or(1));
 
-    let hexagram = gram::Hexagram::from_up_down(gram_up, gram_down);
+    let hexagram = gram::Hexagram::from_up_down(&gram_up, &gram_down);
 
     let text = gaodaotext::get_gua_oracle_md(&hexagram).unwrap();
     // convert markdown to html
@@ -29,7 +29,7 @@ fn get_guaci_alt(up: &str, down: &str, yao: &str) -> String {
     let gram_down = gram::Trigram::from_order(down.parse::<u8>().unwrap_or(1));
     let yao = yao.parse::<u8>().unwrap_or(1);
 
-    let hexagram = gram::Hexagram::from_up_down(gram_up, gram_down).get_change(yao);
+    let hexagram = gram::Hexagram::from_up_down(&gram_up, &gram_down).get_change(yao);
 
     let text = gaodaotext::get_gua_oracle_md(&hexagram).unwrap();
     // convert markdown to html
@@ -48,7 +48,7 @@ fn get_yaoci(up: &str, down: &str, yao: &str) -> String {
     let gram_up = gram::Trigram::from_order(up.parse::<u8>().unwrap_or(1));
     let gram_down = gram::Trigram::from_order(down.parse::<u8>().unwrap_or(1));
 
-    let hexagram = gram::Hexagram::from_up_down(gram_up, gram_down);
+    let hexagram = gram::Hexagram::from_up_down(&gram_up, &gram_down);
 
     let yao = yao.parse::<u8>().unwrap_or(1);
 

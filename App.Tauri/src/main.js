@@ -47,6 +47,27 @@ async function show_gua() {
   resultEl.style.display = "block";
 }
 
+function toggleChangedHexagram() {
+  const changedHexagramContent = document.getElementById('changedHexagramContent');
+  const toggleButton = document.getElementById('toggleButton');
+  if (changedHexagramContent.style.display === 'none') {
+    changedHexagramContent.style.display = 'block';
+    toggleButton.textContent = '收起';
+  } else {
+    changedHexagramContent.style.display = 'none';
+    toggleButton.textContent = '展開';
+  }
+}
+
+function checkFormValidity() {
+  const upValue = document.getElementById('up-input').value;
+  const downValue = document.getElementById('down-input').value;
+  const yaoValue = document.getElementById('yao-input').value;
+  
+  const submitButton = document.getElementById('submitButton');
+  submitButton.disabled = !upValue || !downValue || !yaoValue;
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   upInputEl = document.querySelector("#up-input");
   downInputEl = document.querySelector("#down-input");
@@ -70,3 +91,5 @@ window.addEventListener("DOMContentLoaded", () => {
     show_gua();
   });
 });
+
+//checkFormValidity();
